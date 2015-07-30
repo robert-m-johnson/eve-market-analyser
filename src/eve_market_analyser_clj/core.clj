@@ -4,10 +4,11 @@
 
 (defn -main []
   (let [context (zmq/context 1)]
-    (println "Connecting to hello world server…")
+    (println "Connecting to EMDR server…")
     (with-open [subscriber (doto (zmq/socket context :sub)
                              (zmq/connect "tcp://relay-eu-germany-1.eve-emdr.com:8050")
-                             (zmq/set-receive-timeout 10))]
+                             (zmq/set-receive-timeout 10000)
+                             (zmq/subscribe ""))]
       (dotimes [i 10]
         (println "Receiving item...")
         (zmq/receive subscriber)
