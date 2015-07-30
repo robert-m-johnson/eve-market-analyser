@@ -11,5 +11,5 @@
                              (zmq/subscribe ""))]
       (dotimes [i 10]
         (println "Receiving item...")
-        (zmq/receive subscriber)
-        (println "Received item ")))))
+        (let [bytes (zmq/receive subscriber)]
+          (println "Received :" (vec bytes)))))))
