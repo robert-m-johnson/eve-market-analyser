@@ -1,6 +1,14 @@
 (ns eve-market-analyser-clj.core
   (:gen-class)
-  (:require [zeromq.zmq :as zmq]))
+  (:require [zeromq.zmq :as zmq])
+  (:import java.util.zip.Inflater))
+
+(defn decompress [byte-arr]
+  (let [inflater (Inflater.)
+        out-byte-arr (byte-array (-> (count byte-arr) (* 16)))]
+    (.setInput inflater byte-arr)
+    (let [length (.inflate inflater out-byte-arr)]
+      (byte-array length out-byte-arr))))
 
 (defn -main []
   (let [context (zmq/context 1)]
