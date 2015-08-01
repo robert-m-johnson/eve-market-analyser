@@ -11,8 +11,8 @@
     (let [length (.inflate inflater out-byte-arr)]
       (byte-array length out-byte-arr))))
 
-(defn byte-arr-to-string [byte-arr]
-  (String. byte-arr (Charset/forName "UTF-8")))
+(defn to-string [x]
+  (String. x (Charset/forName "UTF-8")))
 
 (defn -main []
   (let [context (zmq/context 1)]
