@@ -1,7 +1,8 @@
 (ns eve-market-analyser-clj.core
   (:gen-class)
   (:require [zeromq.zmq :as zmq])
-  (:import java.util.zip.Inflater))
+  (:import java.util.zip.Inflater
+           java.nio.charset.Charset))
 
 (defn decompress [byte-arr]
   (let [inflater (Inflater.)
@@ -9,6 +10,9 @@
     (.setInput inflater byte-arr)
     (let [length (.inflate inflater out-byte-arr)]
       (byte-array length out-byte-arr))))
+
+(defn byte-arr-to-string [byte-arr]
+  (String. byte-arr (Charset/forName "UTF-8")))
 
 (defn -main []
   (let [context (zmq/context 1)]
