@@ -12,7 +12,7 @@
     (let [length (.inflate inflater out-byte-arr)]
       (byte-array length out-byte-arr))))
 
-(defn to-string [x]
+(defn to-string [^bytes x]
   (String. x (Charset/forName "UTF-8")))
 
 (defn -main []
