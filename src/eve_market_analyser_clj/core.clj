@@ -1,6 +1,7 @@
 (ns eve-market-analyser-clj.core
   (:gen-class)
-  (:require [zeromq.zmq :as zmq])
+  (:require [zeromq.zmq :as zmq]
+            [cheshire.core :as chesh])
   (:import java.util.zip.Inflater
            java.nio.charset.Charset))
 
