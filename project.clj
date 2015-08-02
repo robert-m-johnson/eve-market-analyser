@@ -9,5 +9,6 @@
                  [cheshire "5.5.0"]]
   :jvm-opts ["-Djava.library.path=/usr/lib:/usr/local/lib"]
   :main ^:skip-aot eve-market-analyser-clj.core
+  :global-vars {*warn-on-reflection* true}
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
