@@ -38,4 +38,7 @@
 
 (deftest a-test
   (testing "Only one region"
-    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"}) (feed->region-item feed-item-with-one-region )))))
+    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
+              :typeID 11134
+              :regionID 10000065})
+           (feed->region-item feed-item-with-one-region )))))

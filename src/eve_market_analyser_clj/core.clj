@@ -18,7 +18,9 @@
 (defn feed->region-item [feed-item]
   (let [rows (:rowsets feed-item)]
     (map (fn [row]
-           {:generatedTime (:generatedAt row)})
+           {:generatedTime (:generatedAt row)
+            :typeID (:typeID row)
+            :regionID (:regionID row)})
          rows)))
 
 (defn -main []
