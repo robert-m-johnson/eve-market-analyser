@@ -4,4 +4,6 @@
 
 (deftest a-test
   (testing "Types"
-    (is (= "Mexallon" (types 36)))))
+    (is (= "Mexallon" (types 36)))
+    (is (= "Tritanium" (types 34)))
+    (is (= "Condor" (types 583)))))
