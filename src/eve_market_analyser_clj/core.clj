@@ -1,6 +1,7 @@
 (ns eve-market-analyser-clj.core
   (:gen-class)
-  (:require [zeromq.zmq :as zmq]
+  (:require [eve-market-analyser-clj.world :as world]
+            [zeromq.zmq :as zmq]
             [cheshire.core :as chesh])
   (:import java.util.zip.Inflater
            java.nio.charset.Charset))
@@ -20,6 +21,7 @@
     (map (fn [row]
            {:generatedTime (:generatedAt row)
             :typeID (:typeID row)
+            :itemName (world/types (:typeID row))
             :regionID (:regionID row)})
          rows)))
 
@@ -33,4 +35,4 @@
       (dotimes [i 1]
         (println "Receiving item...")
         (let [bytes (zmq/receive subscriber)]
-          (println "Received :" (-> bytes decompress to-string )))))))
+          (println "Received :" (-> bytes decompress to-string)))))))
