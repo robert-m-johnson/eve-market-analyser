@@ -15,6 +15,12 @@
 (defn to-string [^bytes x]
   (String. x (Charset/forName "UTF-8")))
 
+(defn feed->region-item [feed-item]
+  (let [rows (:rowsets feed-item)]
+    (map (fn [row]
+           {:generatedTime (:generatedAt row)})
+         rows)))
+
 (defn -main []
   (let [context (zmq/context 1)]
     (println "Connecting to EMDR server…")
@@ -22,7 +28,7 @@
                              (zmq/connect "tcp://relay-eu-germany-1.eve-emdr.com:8050")
                              (zmq/set-receive-timeout 10000)
                              (zmq/subscribe ""))]
-      (dotimes [i 10]
+      (dotimes [i 1]
         (println "Receiving item...")
         (let [bytes (zmq/receive subscriber)]
-          (println "Received :" (vec bytes)))))))
+          (println "Received :" (-> bytes decompress to-string )))))))
