@@ -25,9 +25,9 @@
                            {:price (nth order-vec price-index)
                             :isBid (nth order-vec bid-index)
                             :quantity (nth order-vec quantity-index)})
-        rowsets (:rowsets feed-item)]
+        rowsets (->> (:rowsets feed-item) (filter :regionID))]
     (map (fn [rowset]
-           (let [orders (map order-vec->order (:rows rowset))
+           (let [orders (->> (:rows rowset) (map order-vec->order))
                  buyOrders (->>  (filter #(:isBid %) orders) (map #(dissoc % :isBid)) (sort-by :price >))
                  sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)) (sort-by :price))
                  buyingPrice (->> (map :price buyOrders) (apply max))

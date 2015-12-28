@@ -47,4 +47,17 @@
               :buyingPrice 6000
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 50}]
               :buyOrders [{:price 6000 :quantity 50} {:price 5000 :quantity 50} {:price 4000 :quantity 50}]})
-           (feed->region-item feed-item-with-one-region )))))
+           (feed->region-item feed-item-with-one-region)))))
+
+(deftest unknown-region-excluded
+  (testing "Unknown region excluded"
+    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
+              :typeID 11134
+              :itemName "Amarr Shuttle"
+              :regionID 10000065
+              :regionName "Kor-Azor"
+              :sellingPrice 8999
+              :buyingPrice 6000
+              :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 50}]
+              :buyOrders [{:price 6000 :quantity 50} {:price 5000 :quantity 50} {:price 4000 :quantity 50}]})
+           (feed->region-item feed-item-with-unknown-region)))))
