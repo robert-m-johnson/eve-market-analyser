@@ -28,7 +28,7 @@
         rowsets (:rowsets feed-item)]
     (map (fn [rowset]
            (let [orders (map order-vec->order (:rows rowset))
-                 buyOrders (->>  (filter #(:isBid %) orders) (map #(dissoc % :isBid)))
+                 buyOrders (->>  (filter #(:isBid %) orders) (map #(dissoc % :isBid) (sort-by :price)))
                  sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)))
                  buyingPrice (->> (map :price buyOrders) (apply max))
                  sellingPrice (->> (map :price sellOrders) (apply min))]
@@ -38,7 +38,8 @@
               :regionID (:regionID rowset)
               :regionName (world/regions (:regionID rowset))
               :sellingPrice sellingPrice
-              :buyingPrice buyingPrice}))
+              :buyingPrice buyingPrice
+              :sellOrders sellOrders}))
          rowsets)))
 
 (defn -main []
