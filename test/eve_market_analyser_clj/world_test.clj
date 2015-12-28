@@ -7,3 +7,7 @@
     (is (= "Mexallon" (types 36)))
     (is (= "Tritanium" (types 34)))
     (is (= "Condor" (types 583)))))
+
+(deftest regions-test
+  (testing "Regions"
+    (is (= "Devoid" (regions 10000036)))))

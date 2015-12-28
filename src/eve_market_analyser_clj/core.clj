@@ -22,7 +22,8 @@
            {:generatedTime (:generatedAt row)
             :typeID (:typeID row)
             :itemName (world/types (:typeID row))
-            :regionID (:regionID row)})
+            :regionID (:regionID row)
+            :regionName (world/regions (:regionID row))})
          rows)))
 
 (defn -main []
