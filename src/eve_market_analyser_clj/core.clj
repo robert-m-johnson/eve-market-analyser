@@ -31,7 +31,11 @@
                            {:price (nth order-vec price-index)
                             :isBid (nth order-vec bid-index)
                             :quantity (nth order-vec quantity-index)})
-        rowsets (->> (:rowsets feed-item) (filter :regionID))]
+        rowsets (->>
+                 (:rowsets feed-item)
+                 (filter :regionID) ;; Filter items with no region ID
+                 (filter :typeID) ;; Filter items with no type ID
+                 )]
     (map (fn [rowset]
            (let [orders (->> (:rows rowset) (map order-vec->order))
                  buyOrders (->>  (filter #(:isBid %) orders) (map #(dissoc % :isBid)) (sort-by :price >))
