@@ -45,5 +45,6 @@
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice 6000
-              :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 50}]})
+              :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 50}]
+              :buyOrders [{:price 6000 :quantity 50} {:price 5000 :quantity 50} {:price 4000 :quantity 50}]})
            (feed->region-item feed-item-with-one-region )))))
