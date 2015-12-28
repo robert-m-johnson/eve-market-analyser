@@ -2,7 +2,7 @@
   (:require [clojure.test :refer :all]
             [eve-market-analyser-clj.world :refer :all]))
 
-(deftest a-test
+(deftest types-test
   (testing "Types"
     (is (= "Mexallon" (types 36)))
     (is (= "Tritanium" (types 34)))
