@@ -16,6 +16,12 @@
 (defn to-string [^bytes x]
   (String. x (Charset/forName "UTF-8")))
 
+(defn- apply-or-default [default f s]
+  (if (empty? s)
+    default
+    (apply f s)))
+
+
 (defn feed->region-item [feed-item]
   (let [col-names (:columns feed-item)
         price-index (.indexOf  col-names "price")
@@ -30,8 +36,8 @@
            (let [orders (->> (:rows rowset) (map order-vec->order))
                  buyOrders (->>  (filter #(:isBid %) orders) (map #(dissoc % :isBid)) (sort-by :price >))
                  sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)) (sort-by :price))
-                 buyingPrice (->> (map :price buyOrders) (apply max))
-                 sellingPrice (->> (map :price sellOrders) (apply min))]
+                 buyingPrice (->> (map :price buyOrders) (apply-or-default nil max))
+                 sellingPrice (->> (map :price sellOrders) (apply-or-default nil min))]
              {:generatedTime (:generatedAt rowset)
               :typeID (:typeID rowset)
               :itemName (world/types (:typeID rowset))
