@@ -42,5 +42,6 @@
               :typeID 11134
               :itemName "Amarr Shuttle"
               :regionID 10000065
-              :regionName "Kor-Azor"})
+              :regionName "Kor-Azor"
+              :sellingPrice 8999})
            (feed->region-item feed-item-with-one-region )))))

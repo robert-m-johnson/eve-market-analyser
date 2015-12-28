@@ -17,14 +17,27 @@
   (String. x (Charset/forName "UTF-8")))
 
 (defn feed->region-item [feed-item]
-  (let [rows (:rowsets feed-item)]
-    (map (fn [row]
-           {:generatedTime (:generatedAt row)
-            :typeID (:typeID row)
-            :itemName (world/types (:typeID row))
-            :regionID (:regionID row)
-            :regionName (world/regions (:regionID row))})
-         rows)))
+  (let [col-names (:columns feed-item)
+        price-index (.indexOf  col-names "price")
+        bid-index (.indexOf  col-names "bid")
+        quantity-index (.indexOf col-names "volEntered")
+        order-vec->order (fn [order-vec]
+                           {:price (nth order-vec price-index)
+                            :isBid (nth order-vec bid-index)
+                            :quantity (nth order-vec quantity-index)})
+        rowsets (:rowsets feed-item)]
+    (map (fn [rowset]
+           (let [orders (map order-vec->order (:rows rowset))
+                 buyOrders (->>  (filter #(:isBid %) orders) (map #(dissoc % :isBid)))
+                 sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)))
+                 sellingPrice (->> (map :price sellOrders) (apply min))]
+             {:generatedTime (:generatedAt rowset)
+              :typeID (:typeID rowset)
+              :itemName (world/types (:typeID rowset))
+              :regionID (:regionID rowset)
+              :regionName (world/regions (:regionID rowset))
+              :sellingPrice sellingPrice}))
+         rowsets)))
 
 (defn -main []
   (let [context (zmq/context 1)]
