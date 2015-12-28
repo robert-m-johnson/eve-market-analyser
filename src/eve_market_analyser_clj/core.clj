@@ -30,13 +30,15 @@
            (let [orders (map order-vec->order (:rows rowset))
                  buyOrders (->>  (filter #(:isBid %) orders) (map #(dissoc % :isBid)))
                  sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)))
+                 buyingPrice (->> (map :price buyOrders) (apply max))
                  sellingPrice (->> (map :price sellOrders) (apply min))]
              {:generatedTime (:generatedAt rowset)
               :typeID (:typeID rowset)
               :itemName (world/types (:typeID rowset))
               :regionID (:regionID rowset)
               :regionName (world/regions (:regionID rowset))
-              :sellingPrice sellingPrice}))
+              :sellingPrice sellingPrice
+              :buyingPrice buyingPrice}))
          rowsets)))
 
 (defn -main []
