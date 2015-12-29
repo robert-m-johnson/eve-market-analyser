@@ -34,8 +34,9 @@
   (let [order-vec->order
         (vector-extractor* (:columns feed-item) {:price "price" :quantity "volRemaining" :isBid "bid"})
         rowsets (->> (:rowsets feed-item)
-                     (filter :regionID) ;; Filter items with no region ID
-                     (filter :typeID) ;; Filter items with no type ID
+                     (filter :regionID) ;; Filter out items with no region ID
+                     (filter :typeID) ;; Filter out items with no type ID
+                     (filter #(world/empire-region? (:regionID %))) ;; Filter out null-sec regions
                      )]
     (map (fn [rowset]
            (let [orders (->> (:rows rowset) (map order-vec->order))
