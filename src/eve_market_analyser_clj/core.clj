@@ -28,12 +28,11 @@
   values stored in the vector"
   [col-names name-map]
   (let [key-index-map (fmap #(.indexOf col-names %) name-map)]
-    (fn [v]
-      (fmap #(nth v %) key-index-map))))
+    (fn [v] (fmap #(nth v %) key-index-map))))
 
 (defn feed->region-item [feed-item]
   (let [order-vec->order
-        (vector-extractor* (:columns feed-item) {:price "price" :quantity "volEntered" :isBid "bid"})
+        (vector-extractor* (:columns feed-item) {:price "price" :quantity "volRemaining" :isBid "bid"})
         rowsets (->> (:rowsets feed-item)
                      (filter :regionID) ;; Filter items with no region ID
                      (filter :typeID) ;; Filter items with no type ID
