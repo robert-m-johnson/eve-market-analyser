@@ -79,3 +79,35 @@
    10000015 "Venal"
    10000068 "Verge Vendor"
    10000006 "Wicked Creek"})
+
+(def ^:private empire-regions
+  (let [empire-reg-names
+        #{"Aridia"
+          "Black Rise"
+          "The Bleak Lands"
+          "The Citadel"
+          "Derelik"
+          "Devoid"
+          "Domain"
+          "Essence"
+          "Everyshore"
+          "The Forge"
+          "Genesis"
+          "Heimatar"
+          "Kador"
+          "Khanid"
+          "Kor-Azor"
+          "Lonetrek"
+          "Metropolis"
+          "Molden Heath"
+          "Placid"
+          "Sinq Laison"
+          "Solitude"
+          "Tash-Murkon"
+          "Verge Vendor"}]
+    (->> (filter #(empire-reg-names (val %)) regions)
+         flatten
+         (into #{}))))
+
+(defn empire-region? [x]
+  (empire-regions x))
