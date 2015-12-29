@@ -1,6 +1,7 @@
 (ns eve-market-analyser-clj.core
   (:gen-class)
-  (:require [eve-market-analyser-clj.world :as world]
+  (:require [clojure.algo.generic.functor :refer [fmap]]
+            [eve-market-analyser-clj.world :as world]
             [zeromq.zmq :as zmq]
             [cheshire.core :as chesh])
   (:import java.util.zip.Inflater
@@ -21,30 +22,22 @@
     default
     (apply f s)))
 
-(defn- order-vec->order* [{col-names :columns :as feed-item}
-                          name-map]
-    (fn [order-vec]
-      (->>
-       (map
-        (fn [entry]
-          (let [k (key entry)
-                n (val entry)
-                index (.indexOf col-names n)]
-            [k (nth order-vec index)]))
-        name-map)
-       flatten
-       (apply  hash-map))))
+(defn- vector-extractor*
+  "Given a vector of column names, and a map of keys and corresponding column
+  names, returns a function that will return a map of the keys and the corresponding
+  values stored in the vector"
+  [col-names name-map]
+  (let [key-index-map (fmap #(.indexOf col-names %) name-map)]
+    (fn [v]
+      (fmap #(nth v %) key-index-map))))
 
 (defn feed->region-item [feed-item]
-  (let [order-vec->order (order-vec->order*
-                          feed-item
-                          {:price "price"
-                           :quantity "volEntered"
-                           :isBid "bid"})
+  (let [order-vec->order
+        (vector-extractor* (:columns feed-item) {:price "price" :quantity "volEntered" :isBid "bid"})
         rowsets (->> (:rowsets feed-item)
-                 (filter :regionID) ;; Filter items with no region ID
-                 (filter :typeID) ;; Filter items with no type ID
-                 )]
+                     (filter :regionID) ;; Filter items with no region ID
+                     (filter :typeID) ;; Filter items with no type ID
+                     )]
     (map (fn [rowset]
            (let [orders (->> (:rows rowset) (map order-vec->order))
                  buyOrders (->>  (filter :isBid orders) (map #(dissoc % :isBid)) (sort-by :price >))
