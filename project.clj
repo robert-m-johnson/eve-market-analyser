@@ -7,7 +7,9 @@
                  [org.clojure/algo.generic "0.1.2"]
                  [org.zeromq/cljzmq "0.1.4"]
                  ;; JSON parsing
-                 [cheshire "5.5.0"]]
+                 [cheshire "5.5.0"]
+                 ;; MongoDB
+                 [com.novemberain/monger "3.0.0-rc2"]]
   :jvm-opts ["-Djava.library.path=/usr/lib:/usr/local/lib"]
   :main ^:skip-aot eve-market-analyser-clj.core
   ;; :global-vars {*warn-on-reflection* true}

@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [clojure.algo.generic.functor :refer [fmap]]
             [eve-market-analyser-clj.world :as world]
+            [eve-market-analyser-clj.db :as db]
             [zeromq.zmq :as zmq]
             [cheshire.core :as chesh])
   (:import java.util.zip.Inflater
@@ -64,5 +65,7 @@
                              (zmq/subscribe ""))]
       (dotimes [i 1]
         (println "Receiving item...")
-        (let [bytes (zmq/receive subscriber)]
-          (println "Received :" (-> bytes decompress to-string)))))))
+        (let [bytes (zmq/receive subscriber)
+              item (-> bytes decompress to-string (chesh/parse-string true) feed->region-item)]
+          (println item)
+          (db/insert-items item))))))
