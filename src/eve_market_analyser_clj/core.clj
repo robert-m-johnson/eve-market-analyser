@@ -63,9 +63,11 @@
                              (zmq/connect "tcp://relay-eu-germany-1.eve-emdr.com:8050")
                              (zmq/set-receive-timeout 10000)
                              (zmq/subscribe ""))]
-      (dotimes [i 1]
+      (dotimes [i 1000]
         (println "Receiving item...")
         (let [bytes (zmq/receive subscriber)
-              item (-> bytes decompress to-string (chesh/parse-string true) feed->region-item)]
-          (println item)
-          (db/insert-items item))))))
+              feed-item (-> bytes decompress to-string (chesh/parse-string true))]
+          (if (= "orders" (:resultType feed-item))
+            (let [region-items (feed->region-item feed-item)]
+              (println region-items)
+              (db/insert-items region-items))))))))
