@@ -3,9 +3,9 @@
             [monger.collection :as mc])
   (:import com.mongodb.BasicDBObject))
 
-(defonce ^:private conn (mg/connect))
+(defonce ^:private conn (delay (mg/connect)))
 
-(defonce ^:private db (mg/get-db conn "eve"))
+(defn- get-db [] (mg/get-db @conn "eve"))
 
 (def ^:private marketItemColl "marketItem")
 
@@ -33,7 +33,7 @@
                        "regionID" (:regionID item)
                        "generatedTime" {"$lt" (:generatedTime item)}}]
       (try
-        (mc/update db marketItemColl updateQuery doc {:upsert true})
+        (mc/update (get-db) marketItemColl updateQuery doc {:upsert true})
         (catch com.mongodb.DuplicateKeyException e
           (prn "Item older than current; ignoring"))))))
 
