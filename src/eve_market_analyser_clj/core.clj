@@ -63,7 +63,7 @@
                              (zmq/connect "tcp://relay-eu-germany-1.eve-emdr.com:8050")
                              (zmq/set-receive-timeout 10000)
                              (zmq/subscribe ""))]
-      (dotimes [i 10]
+      (while true
         (println "Receiving item...")
         (let [bytes (zmq/receive subscriber)
               feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
