@@ -18,7 +18,7 @@
   (doto (BasicDBObject.)
     (.put "typeID" (:typeID marketItem))
     (.put "itemName" (:itemName marketItem))
-    (.put "regionId" (:regionID marketItem))
+    (.put "regionID" (:regionID marketItem))
     (.put "regionName" (:regionName marketItem))
     (.put "sellingPrice" (:sellingPrice marketItem))
     (.put "buyingPrice" (:buyingPrice marketItem))
@@ -28,5 +28,12 @@
 
 (defn insert-items [items]
   (doseq [item items]
-    (mc/insert db marketItemColl (marketItem->doc item))))
+    (let [doc (marketItem->doc item)
+          updateQuery {"typeID" (:typeID item)
+                       "regionID" (:regionID item)
+                       "generatedTime" {"$lt" (:generatedTime item)}}]
+      (try
+        (mc/update db marketItemColl updateQuery doc {:upsert true})
+        (catch com.mongodb.DuplicateKeyException e
+          (prn "Item older than current; ignoring"))))))
 
