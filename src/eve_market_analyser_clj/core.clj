@@ -25,8 +25,8 @@
 
 (defn- vector-extractor*
   "Given a vector of column names, and a map of keys and corresponding column
-  names, returns a function that will return a map of the keys and the corresponding
-  values stored in the vector"
+  names, returns a function that, given a vector will return a map of the keys
+  and the corresponding values taken from the vector"
   [col-names name-map]
   (let [key-index-map (fmap #(.indexOf col-names %) name-map)]
     (fn [v] (fmap #(nth v %) key-index-map))))
