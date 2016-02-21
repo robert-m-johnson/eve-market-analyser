@@ -35,5 +35,5 @@
       (try
         (mc/update (get-db) marketItemColl updateQuery doc {:upsert true})
         (catch com.mongodb.DuplicateKeyException e
-          (prn "Item older than current; ignoring"))))))
+          (println "Item older than current; ignoring"))))))
 
