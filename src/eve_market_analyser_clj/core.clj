@@ -38,7 +38,7 @@
                      (filter :regionID) ;; Filter out items with no region ID
                      (filter :typeID) ;; Filter out items with no type ID
                      (filter #(world/empire-region? (:regionID %))) ;; Filter out null-sec regions
-                     )]
+)]
     (map (fn [rowset]
            (let [orders (->> (:rows rowset) (map order-vec->order))
                  buyOrders (->>  (filter :isBid orders) (map #(dissoc % :isBid)) (sort-by :price >))
@@ -58,16 +58,22 @@
 
 (defn -main []
   (let [context (zmq/context 1)]
-    (println "Connecting to EMDR server…")
-    (with-open [subscriber (doto (zmq/socket context :sub)
-                             (zmq/connect "tcp://relay-eu-germany-1.eve-emdr.com:8050")
-                             (zmq/set-receive-timeout 10000)
-                             (zmq/subscribe ""))]
-      (while true
-        (println "Receiving item...")
-        (let [bytes (zmq/receive subscriber)
-              feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
-          (if (= "orders" (:resultType feed-item))
-            (let [region-items (feed->region-item feed-item)]
-              (println region-items)
-              (db/insert-items region-items))))))))
+    (while true ; Retry connection if we timed out
+      (println "Connecting to EMDR server…")
+      (with-open [subscriber (doto (zmq/socket context :sub)
+                               (zmq/connect "tcp://relay-eu-germany-1.eve-emdr.com:8050")
+                               (zmq/set-receive-timeout 30000)
+                               (zmq/subscribe ""))]
+        (loop []
+          (println "Receiving item...")
+          (let [bytes (zmq/receive subscriber)]
+            (if bytes
+              (do
+                (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
+                  (if (= "orders" (:resultType feed-item))
+                    (let [region-items (feed->region-item feed-item)]
+                      (println "Valid item received")
+                      (db/insert-items region-items))))
+                ; Only continue loop if we received a message; else retry connection
+                (recur))
+              (println "Socket timed out"))))))))
