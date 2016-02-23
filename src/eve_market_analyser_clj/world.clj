@@ -15,6 +15,7 @@
                (->> pairs flatten (apply hash-map)))))
 
 (def regions
+  "A map of the region IDs and their corresponding names"
   {10000054 "Aridia"
    10000069 "Black Rise"
    10000055 "Branch"
@@ -81,6 +82,7 @@
    10000006 "Wicked Creek"})
 
 (def ^:private empire-regions
+  "A set of the empire regions IDs and names"
   (let [empire-reg-names
         #{"Aridia"
           "Black Rise"
@@ -109,5 +111,7 @@
          flatten
          (into #{}))))
 
-(defn empire-region? [x]
+(defn empire-region?
+  "Returns whether x is the ID or name of a region in empire space"
+  [x]
   (empire-regions x))
