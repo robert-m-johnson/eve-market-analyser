@@ -71,11 +71,14 @@
           (let [bytes (zmq/receive subscriber)]
             (if bytes
               (do
-                (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
-                  (if (= "orders" (:resultType feed-item))
-                    (let [region-items (feed->region-item feed-item)]
-                      (println "Valid item received")
-                      (db/insert-items region-items))))
-                ; Only continue loop if we received a message; else retry connection
+                (try
+                  (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
+                    (if (= "orders" (:resultType feed-item))
+                      (let [region-items (feed->region-item feed-item)]
+                        (println "Valid item received")
+                        (db/insert-items region-items))))
+                  (catch Exception ex
+                    (println ex)))
+                ;; Only continue loop if we received a message; else retry connection
                 (recur))
               (println "Socket timed out"))))))))
