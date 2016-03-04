@@ -4,7 +4,8 @@
             [eve-market-analyser-clj.world :as world]
             [eve-market-analyser-clj.db :as db]
             [zeromq.zmq :as zmq]
-            [cheshire.core :as chesh])
+            [cheshire.core :as chesh]
+            [clojure.tools.logging :as log])
   (:import java.util.zip.Inflater
            java.nio.charset.Charset))
 
@@ -58,16 +59,16 @@
               :buyOrders buyOrders}))
          rowsets)))
 
-(defn -main []
+(defn- listen []
   (let [context (zmq/context 1)]
     (while true ; Retry connection if we timed out
-      (println "Connecting to EMDR server…")
+      (log/info "Connecting to EMDR server…")
       (with-open [subscriber (doto (zmq/socket context :sub)
                                (zmq/connect "tcp://relay-eu-germany-1.eve-emdr.com:8050")
                                (zmq/set-receive-timeout 30000)
                                (zmq/subscribe ""))]
         (loop []
-          (println "Receiving item...")
+          (log/debug "Receiving item...")
           (let [bytes (zmq/receive subscriber)]
             (if bytes
               (do
@@ -75,10 +76,13 @@
                   (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
                     (if (= "orders" (:resultType feed-item))
                       (let [region-items (feed->region-item feed-item)]
-                        (println "Valid item received")
+                        (log/debug "Valid item received")
                         (db/insert-items region-items))))
                   (catch Exception ex
-                    (println ex)))
+                    (log/error ex)))
                 ;; Only continue loop if we received a message; else retry connection
                 (recur))
-              (println "Socket timed out"))))))))
+              (log/info "Socket timed out"))))))))
+
+(defn -main []
+  (listen))

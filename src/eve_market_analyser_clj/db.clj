@@ -1,6 +1,7 @@
 (ns eve-market-analyser-clj.db
   (:require [monger.core :as mg]
-            [monger.collection :as mc])
+            [monger.collection :as mc]
+            [clojure.tools.logging :as log])
   (:import com.mongodb.BasicDBObject))
 
 (defonce ^:private conn (delay (mg/connect)))
@@ -35,5 +36,5 @@
       (try
         (mc/update (get-db) marketItemColl updateQuery doc {:upsert true})
         (catch com.mongodb.DuplicateKeyException e
-          (println "Item older than current; ignoring"))))))
+          (log/debug "Item older than current; ignoring"))))))
 
