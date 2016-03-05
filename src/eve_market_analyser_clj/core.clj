@@ -1,6 +1,12 @@
 (ns eve-market-analyser-clj.core
   (:gen-class)
-  (:require [eve-market-analyser-clj.feed :as feed]))
+  (:require [eve-market-analyser-clj.feed :as feed]
+            [eve-market-analyser-clj.handler :as handler]
+            [ring.adapter.jetty :refer [run-jetty]]))
 
-(defn -main []
-  (feed/listen))
+;; (defn -main []
+;;   (feed/listen))
+
+(defn -main [& args]
+  (future (feed/listen))
+  (defonce server (run-jetty #'handler/app {:port 8080 :join? false})))

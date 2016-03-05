@@ -10,6 +10,11 @@
                  [cheshire "5.5.0"]
                  ;; MongoDB
                  [com.novemberain/monger "3.0.0-rc2"]
+                 ;; Web
+                 [ring "1.4.0"]
+                 [compojure "1.4.0"]
+                 [enlive "1.1.6"]
+                 ;; Logging
                  [org.clojure/tools.logging "0.3.1"]
                  [log4j/log4j "1.2.17"]]
   :jvm-opts ["-Djava.library.path=/usr/lib:/usr/local/lib"]
