@@ -1,6 +1,6 @@
-(ns eve-market-analyser-clj.core-test
+(ns eve-market-analyser-clj.feed-test
   (:require [clojure.test :refer :all]
-            [eve-market-analyser-clj.core :refer :all]))
+            [eve-market-analyser-clj.feed :refer :all]))
 
 
 (def feed-item-with-one-region

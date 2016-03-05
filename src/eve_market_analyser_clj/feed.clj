@@ -32,7 +32,7 @@
   (let [key-index-map (fmap #(.indexOf col-names %) name-map)]
     (fn [v] (fmap #(nth v %) key-index-map))))
 
-(defn- feed->region-item [feed-item]
+(defn feed->region-item [feed-item]
   (let [order-vec->order
         (vector-extractor* (:columns feed-item) {:price "price" :quantity "volRemaining" :isBid "bid"})
         rowsets (->> (:rowsets feed-item)
