@@ -1,6 +1,7 @@
 (ns eve-market-analyser-clj.world
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.set]))
 
 (def types
   "A map of the type IDs and their corresponding item names"
@@ -83,35 +84,47 @@
    10000068 "Verge Vendor"
    10000006 "Wicked Creek"})
 
+(def ^:private region-names->ids
+  (clojure.set/map-invert regions))
+
 (def ^:private empire-regions
   "A set of the empire regions IDs and names"
   (let [empire-reg-names
-        #{"Aridia"
-          "Black Rise"
-          "The Bleak Lands"
-          "The Citadel"
-          "Derelik"
-          "Devoid"
-          "Domain"
-          "Essence"
-          "Everyshore"
-          "The Forge"
-          "Genesis"
-          "Heimatar"
-          "Kador"
-          "Khanid"
-          "Kor-Azor"
-          "Lonetrek"
-          "Metropolis"
-          "Molden Heath"
-          "Placid"
-          "Sinq Laison"
-          "Solitude"
-          "Tash-Murkon"
-          "Verge Vendor"}]
-    (->> (filter #(empire-reg-names (val %)) regions)
+        ["Aridia"
+         "Black Rise"
+         "The Bleak Lands"
+         "The Citadel"
+         "Derelik"
+         "Devoid"
+         "Domain"
+         "Essence"
+         "Everyshore"
+         "The Forge"
+         "Genesis"
+         "Heimatar"
+         "Kador"
+         "Khanid"
+         "Kor-Azor"
+         "Lonetrek"
+         "Metropolis"
+         "Molden Heath"
+         "Placid"
+         "Sinq Laison"
+         "Solitude"
+         "Tash-Murkon"
+         "Verge Vendor"]]
+    (->> (select-keys region-names->ids empire-reg-names)
+         seq
          flatten
          (into #{}))))
+
+(def trade-hub-region-names
+  "A vector of the trade hub region names, in descending order of importance"
+  ["The Forge"
+   "Amarr"
+   "Heimater"
+   "Sinq Laison"
+   "Metropolis"])
 
 (defn empire-region?
   "Returns whether x is the ID or name of a region in empire space"
