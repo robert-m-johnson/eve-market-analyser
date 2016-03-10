@@ -122,7 +122,7 @@
   "A vector of the trade hub region names, in descending order of importance"
   ["The Forge"
    "Amarr"
-   "Heimater"
+   "Heimatar"
    "Sinq Laison"
    "Metropolis"])
 
