@@ -8,6 +8,7 @@
   (cc/GET "/" [] (ring.util.response/resource-response "public/index.html"))
   (cc/GET "/hub-item" [itemName] (parser/render-file
                                   "templates/hub-item.html" {:itemName itemName}))
+  (route/resources "/")
   (route/not-found "Not Found"))
 
 (def app
