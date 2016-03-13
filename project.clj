@@ -13,6 +13,7 @@
                  ;; Web
                  [ring "1.4.0"]
                  [compojure "1.4.0"]
+                 [selmer "1.0.2"]
                  [enlive "1.1.6"]
                  ;; Logging
                  [org.clojure/tools.logging "0.3.1"]
