@@ -1,7 +1,9 @@
 (ns eve-market-analyser-clj.db
   (:require [monger.core :as mg]
             [monger.collection :as mc]
-            [clojure.tools.logging :as log])
+            [monger.operators :refer :all]
+            [clojure.tools.logging :as log]
+            [eve-market-analyser-clj.world :as world])
   (:import com.mongodb.BasicDBObject))
 
 (defonce ^:private conn (delay (mg/connect)))
@@ -38,3 +40,16 @@
         (catch com.mongodb.DuplicateKeyException e
           (log/debug "Item older than current; ignoring"))))))
 
+(def ^:private hub-ordering
+  (let [names world/trade-hub-region-names]
+    (->>
+     (map #(list % (.indexOf names %)) names)
+     flatten
+     (apply hash-map))))
+
+(defn find-hub-prices-for-item-name [itemName]
+  (->>
+   (mc/find-maps (get-db) marketItemColl
+                 {:itemName itemName
+                  :regionName {$in world/trade-hub-region-names}})
+   (sort-by #(hub-ordering (:regionName %)))))
