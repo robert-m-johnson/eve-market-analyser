@@ -4,10 +4,8 @@
             [compojure.route :as route]))
 
 (cc/defroutes app-routes
-  ;; (cc/GET "/"
-  ;;     []
-  ;;   (views/home-page))
-  (route/resources "/")
+  (cc/GET "/" [] (ring.util.response/resource-response "public/index.html"))
+  (cc/GET "/hub-item" [itemName] (ring.util.response/response itemName))
   (route/not-found "Not Found"))
 
 (def app
