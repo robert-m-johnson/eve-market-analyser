@@ -43,7 +43,7 @@
 (def ^:private hub-ordering
   (let [names world/trade-hub-region-names]
     (->>
-     (map #(list % (.indexOf names %)) names)
+     (map #(vector % (.indexOf names %)) names)
      flatten
      (apply hash-map))))
 

@@ -13,6 +13,20 @@
 </head>
 
 <body>
-  You searched for "{{itemName}}"
+  <p>You searched for "{{itemName}}"</p>
+  <table>
+    <tr>
+      <th>Hub</th>
+      <th>Selling Price</th>
+      <th>Buying Price</th>
+    </tr>
+    {% for item in results %}
+    <tr>
+      <td>{{item.regionName}}</td>
+      <td>{{item.sellingPrice}}</td>
+      <td>{{item.buyingPrice}}</td>
+    </tr>
+    {% endfor %}
+  </table>
 </body>
 </html>
