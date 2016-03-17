@@ -1,16 +1,12 @@
-/* body { */
-/*     background-color: Cornsilk; */
-/* } */
-
-/* #header-links { */
-/*     background-color: BurlyWood; */
-/*     padding: 10px; */
-/* } */
-
-/* h1 { */
-/*     color: CornflowerBlue; */
-/* } */
-
 html {
     font-family: Roboto,Helvetica,sans-serif;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+td, th {
+    border: 1px solid #CCC;
 }
