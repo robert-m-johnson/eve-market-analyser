@@ -47,9 +47,15 @@
      flatten
      (apply hash-map))))
 
-(defn find-hub-prices-for-item-name [itemName]
-  (->>
-   (mc/find-maps (get-db) marketItemColl
-                 {:itemName itemName
-                  :regionName {$in world/trade-hub-region-names}})
-   (sort-by #(hub-ordering (:regionName %)))))
+(defn find-hub-prices-for-item-name
+  [itemName & fields]
+  (let [results
+         (mc/find-maps (get-db) marketItemColl
+                       {:itemName itemName
+                        :regionName {$in world/trade-hub-region-names}}
+                       (if (fields) fields {}))]
+    ;; If region name was included in the search, then sort according to
+    ;; the trade hub priority order
+    (if (some #{:regionName} fields)
+      (sort-by #(hub-ordering (:regionName %)) results)
+      results)))
