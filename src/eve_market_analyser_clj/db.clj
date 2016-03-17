@@ -53,7 +53,7 @@
          (mc/find-maps (get-db) marketItemColl
                        {:itemName itemName
                         :regionName {$in world/trade-hub-region-names}}
-                       (if (fields) fields {}))]
+                       (if fields fields {}))]
     ;; If region name was included in the search, then sort according to
     ;; the trade hub priority order
     (if (some #{:regionName} fields)
