@@ -121,7 +121,7 @@
 (def trade-hub-region-names
   "A vector of the trade hub region names, in descending order of importance"
   ["The Forge"
-   "Amarr"
+   "Domain"
    "Heimatar"
    "Sinq Laison"
    "Metropolis"])
