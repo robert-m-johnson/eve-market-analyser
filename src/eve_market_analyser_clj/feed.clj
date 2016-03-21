@@ -49,9 +49,9 @@
                  buyingPrice (->> (map :price buyOrders) (apply-or-default nil max))
                  sellingPrice (->> (map :price sellOrders) (apply-or-default nil min))]
              {:generatedTime (:generatedAt rowset)
-              :typeID (:typeID rowset)
+              :typeId (:typeID rowset)
               :itemName (world/types (:typeID rowset))
-              :regionID (:regionID rowset)
+              :regionId (:regionID rowset)
               :regionName (world/regions (:regionID rowset))
               :sellingPrice sellingPrice
               :buyingPrice buyingPrice

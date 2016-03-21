@@ -19,9 +19,9 @@
 
 (defn- marketItem->doc [marketItem]
   (doto (BasicDBObject.)
-    (.put "typeID" (:typeID marketItem))
+    (.put "typeId" (:typeId marketItem))
     (.put "itemName" (:itemName marketItem))
-    (.put "regionID" (:regionID marketItem))
+    (.put "regionId" (:regionId marketItem))
     (.put "regionName" (:regionName marketItem))
     (.put "sellingPrice" (:sellingPrice marketItem))
     (.put "buyingPrice" (:buyingPrice marketItem))
@@ -32,8 +32,8 @@
 (defn insert-items [items]
   (doseq [item items]
     (let [doc (marketItem->doc item)
-          updateQuery {"typeID" (:typeID item)
-                       "regionID" (:regionID item)
+          updateQuery {"typeId" (:typeId item)
+                       "regionId" (:regionId item)
                        "generatedTime" {"$lt" (:generatedTime item)}}]
       (try
         (mc/update (get-db) marketItemColl updateQuery doc {:upsert true})

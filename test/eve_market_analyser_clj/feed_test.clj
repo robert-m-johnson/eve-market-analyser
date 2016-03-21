@@ -21,9 +21,9 @@
 (deftest single-region
   (testing "Only one region"
     (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
-              :typeID 11134
+              :typeId 11134
               :itemName "Amarr Shuttle"
-              :regionID 10000065
+              :regionId 10000065
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice 6000
@@ -48,18 +48,18 @@
 (deftest two-regions
   (testing "Two regions"
     (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
-              :typeID 11134
+              :typeId 11134
               :itemName "Amarr Shuttle"
-              :regionID 10000065
+              :regionId 10000065
               :regionName "Kor-Azor"
               :sellingPrice 11500
               :buyingPrice 4000
               :sellOrders [{:price 11500 :quantity 48}]
               :buyOrders [{:price 4000 :quantity 48}]}
              {:generatedTime "2011-10-22T15:42:00+00:00"
-              :typeID 11135
+              :typeId 11135
               :itemName "Amarr Shuttle Blueprint"
-              :regionID 10000033
+              :regionId 10000033
               :regionName "The Citadel"
               :sellingPrice 8999
               :buyingPrice 11500
@@ -89,9 +89,9 @@
 (deftest unknown-region-excluded
   (testing "Unknown region excluded"
     (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
-              :typeID 11134
+              :typeId 11134
               :itemName "Amarr Shuttle"
-              :regionID 10000065
+              :regionId 10000065
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice 6000
@@ -121,9 +121,9 @@
 (deftest nullsec-region-excluded
   (testing "Null-sec region excluded"
     (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
-              :typeID 11134
+              :typeId 11134
               :itemName "Amarr Shuttle"
-              :regionID 10000065
+              :regionId 10000065
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice 6000
@@ -153,9 +153,9 @@
 (deftest unknown-type-excluded
   (testing "Unknown type excluded"
     (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
-              :typeID 11134
+              :typeId 11134
               :itemName "Amarr Shuttle"
-              :regionID 10000065
+              :regionId 10000065
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice 6000
@@ -177,9 +177,9 @@
 (deftest no-buy-orders
   (testing "No buy orders"
     (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
-              :typeID 11134
+              :typeId 11134
               :itemName "Amarr Shuttle"
-              :regionID 10000065
+              :regionId 10000065
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice nil
@@ -201,9 +201,9 @@
 (deftest no-sell-orders
   (testing "No sell orders"
     (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
-              :typeID 11134
+              :typeId 11134
               :itemName "Amarr Shuttle"
-              :regionID 10000065
+              :regionId 10000065
               :regionName "Kor-Azor"
               :sellingPrice nil
               :buyingPrice 6000
