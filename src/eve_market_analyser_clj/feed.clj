@@ -49,7 +49,7 @@
                  sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)) (sort-by :price))
                  buyingPrice (->> (map :price buyOrders) (apply-or-default nil max))
                  sellingPrice (->> (map :price sellOrders) (apply-or-default nil min))]
-             {:generatedTime (clj-time.format/parse :generatedAt rowset)
+             {:generatedTime (clj-time.format/parse (:generatedAt rowset))
               :typeId (:typeID rowset)
               :itemName (world/types (:typeID rowset))
               :regionId (:regionID rowset)
