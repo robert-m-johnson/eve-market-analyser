@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/algo.generic "0.1.2"]
                  [org.zeromq/cljzmq "0.1.4"]
+                 [clj-time "0.11.0"]
                  ;; JSON parsing
                  [cheshire "5.5.0"]
                  ;; MongoDB

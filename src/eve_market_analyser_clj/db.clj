@@ -3,7 +3,10 @@
             [monger.collection :as mc]
             [monger.operators :refer :all]
             [clojure.tools.logging :as log]
-            [eve-market-analyser-clj.world :as world])
+            [eve-market-analyser-clj.world :as world]
+            [clj-time.coerce]
+            ;; Enable joda integration
+            [monger.joda-time])
   (:import com.mongodb.BasicDBObject))
 
 (defonce ^:private conn (delay (mg/connect)))
@@ -25,7 +28,7 @@
     (.put "regionName" (:regionName marketItem))
     (.put "sellingPrice" (:sellingPrice marketItem))
     (.put "buyingPrice" (:buyingPrice marketItem))
-    (.put "generatedTime" (:generatedTime marketItem))
+    (.put "generatedTime" (clj-time.coerce/to-date (:generatedTime marketItem)))
     (.put "sellOrders" (map orderItem->doc (:sellOrders marketItem)))
     (.put "buyOrders" (map orderItem->doc (:buyOrders marketItem)))))
 

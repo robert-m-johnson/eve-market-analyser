@@ -5,7 +5,8 @@
             [eve-market-analyser-clj.db :as db]
             [zeromq.zmq :as zmq]
             [cheshire.core :as chesh]
-            [clojure.tools.logging :as log])
+            [clojure.tools.logging :as log]
+            [clj-time.format])
   (:import java.util.zip.Inflater
            java.nio.charset.Charset))
 
@@ -48,7 +49,7 @@
                  sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)) (sort-by :price))
                  buyingPrice (->> (map :price buyOrders) (apply-or-default nil max))
                  sellingPrice (->> (map :price sellOrders) (apply-or-default nil min))]
-             {:generatedTime (:generatedAt rowset)
+             {:generatedTime (clj-time.format/parse :generatedAt rowset)
               :typeId (:typeID rowset)
               :itemName (world/types (:typeID rowset))
               :regionId (:regionID rowset)
