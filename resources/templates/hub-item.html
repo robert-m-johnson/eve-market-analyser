@@ -18,14 +18,14 @@
     <input type="submit" value="Submit" />
   </form>
   <p>{{itemName}}</p>
-  {% if not results|empty? %}
+  {% if not hubItems|empty? %}
   <table>
     <tr>
       <th>Hub</th>
       <th>Selling Price</th>
       <th>Buying Price</th>
     </tr>
-    {% for item in results %}
+    {% for item in hubItems %}
     <tr>
       <td>{{item.regionName}}</td>
       <td>{{item.sellingPrice}}</td>
