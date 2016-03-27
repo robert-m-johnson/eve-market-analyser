@@ -1,41 +1,47 @@
 <!doctype html>
 
 <html lang="en">
-<head>
-  <meta charset="utf-8">
+    <head>
+        <meta charset="utf-8">
 
-  <title>Eve Market Analyzer</title>
-  <meta name="description" content="Eve Market Analyzer">
-  <meta name="author" content="Robert Johnson">
+        <title>Eve Market Analyzer</title>
+        <meta name="description" content="Eve Market Analyzer">
+        <meta name="author" content="Robert Johnson">
 
-  <link rel="stylesheet" href="css/styles.css"></link>
+        <link rel="stylesheet" href="css/styles.css"></link>
 
-</head>
+    </head>
 
-<body>
-  <form action="/hub-item" method="GET">
-    <input type="text" name="itemName" method="GET" autofocus />
-    <input type="submit" value="Submit" />
-  </form>
-  <p>{{itemName}}</p>
-  {% if not hubItems|empty? %}
-  <table>
-    <tr>
-      <th>Hub</th>
-      <th>Selling Price</th>
-      <th>Buying Price</th>
-    </tr>
-    {% for item in hubItems %}
-    <tr>
-      <td>{{item.regionName}}</td>
-      <td>{{item.sellingPrice}}</td>
-      <td>{{item.buyingPrice}}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% else %}
-  <p>No data found</p>
-  {% endif %}
-  <p>{{earliestGenerated}}</p>
-</body>
+    <body>
+        <form action="/hub-item" method="GET">
+            <input type="text" name="itemName" method="GET" autofocus />
+            <input type="submit" value="Submit" />
+        </form>
+        <p>{{itemName}}</p>
+        {% if not hubItems|empty? %}
+        <table>
+            <tr>
+                <th>Hub</th>
+                <th>Selling Price</th>
+                <th>Buying Price</th>
+            </tr>
+            {% for item in hubItems %}
+            <tr>
+                <td >
+                    {{item.regionName}}
+                </td>
+                <td {% if item.highestSellingPrice %}class="highestSellingPrice"{% endif %}>
+                    {{item.sellingPrice}}
+                </td>
+                <td {% if item.lowestBuyingPrice %}class="lowestBuyingPrice"{% endif %}>
+                    {{item.buyingPrice}}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No data found</p>
+        {% endif %}
+        <p>{{earliestGenerated}}</p>
+    </body>
 </html>

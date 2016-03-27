@@ -36,8 +36,9 @@
      items)))
 
 (defn fetch-hub-prices-model [item-name]
-  (let [hub-items (db/find-hub-prices-for-item-name
-                 item-name :itemName :regionName :buyingPrice :sellingPrice :generatedTime)
+  (let [hub-items (->  (db/find-hub-prices-for-item-name
+                        item-name :itemName :regionName :buyingPrice :sellingPrice :generatedTime)
+                       mark-best-prices)
         earliest-generated (if (empty? hub-items)
                              nil
                              (t/earliest (map :generatedTime hub-items)))]

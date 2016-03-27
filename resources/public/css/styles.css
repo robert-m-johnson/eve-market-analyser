@@ -10,3 +10,7 @@ table {
 td, th {
     border: 1px solid #CCC;
 }
+
+td.highestSellingPrice, td.lowestBuyingPrice {
+    background-color: #99CCFF;
+}
