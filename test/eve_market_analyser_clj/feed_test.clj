@@ -1,6 +1,7 @@
 (ns eve-market-analyser-clj.feed-test
   (:require [clojure.test :refer :all]
-            [eve-market-analyser-clj.feed :refer :all]))
+            [eve-market-analyser-clj.feed :refer :all]
+            [clj-time.coerce :as tc]))
 
 
 (def feed-item-with-one-region
@@ -20,7 +21,7 @@
 
 (deftest single-region
   (testing "Only one region"
-    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
+    (is (= [{:generatedTime (tc/from-string "2011-10-22T15:43:00+00:00")
               :typeId 11134
               :itemName "Amarr Shuttle"
               :regionId 10000065
@@ -28,7 +29,7 @@
               :sellingPrice 8999
               :buyingPrice 6000
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]})
+              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-item feed-item-with-one-region)))))
 
 (def feed-item-with-2-regions
@@ -47,7 +48,7 @@
 
 (deftest two-regions
   (testing "Two regions"
-    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
+    (is (= [{:generatedTime (tc/from-string "2011-10-22T15:43:00+00:00")
               :typeId 11134
               :itemName "Amarr Shuttle"
               :regionId 10000065
@@ -56,7 +57,7 @@
               :buyingPrice 4000
               :sellOrders [{:price 11500 :quantity 48}]
               :buyOrders [{:price 4000 :quantity 48}]}
-             {:generatedTime "2011-10-22T15:42:00+00:00"
+             {:generatedTime (tc/from-string "2011-10-22T15:42:00+00:00")
               :typeId 11135
               :itemName "Amarr Shuttle Blueprint"
               :regionId 10000033
@@ -64,7 +65,7 @@
               :sellingPrice 8999
               :buyingPrice 11500
               :sellOrders [{:price 8999 :quantity 1}]
-              :buyOrders [{:price 11500 :quantity 48}]})
+              :buyOrders [{:price 11500 :quantity 48}]}]
            (feed->region-item feed-item-with-2-regions)))))
 
 (def feed-item-with-unknown-region
@@ -88,7 +89,7 @@
 
 (deftest unknown-region-excluded
   (testing "Unknown region excluded"
-    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
+    (is (= [{:generatedTime (tc/from-string "2011-10-22T15:43:00+00:00")
               :typeId 11134
               :itemName "Amarr Shuttle"
               :regionId 10000065
@@ -96,7 +97,7 @@
               :sellingPrice 8999
               :buyingPrice 6000
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]})
+              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-item feed-item-with-unknown-region)))))
 
 (def feed-item-with-nullsec-region
@@ -120,7 +121,7 @@
 
 (deftest nullsec-region-excluded
   (testing "Null-sec region excluded"
-    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
+    (is (= [{:generatedTime (tc/from-string "2011-10-22T15:43:00+00:00")
               :typeId 11134
               :itemName "Amarr Shuttle"
               :regionId 10000065
@@ -128,7 +129,7 @@
               :sellingPrice 8999
               :buyingPrice 6000
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]})
+              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-item feed-item-with-nullsec-region)))))
 
 (def feed-item-with-unknown-type
@@ -152,7 +153,7 @@
 
 (deftest unknown-type-excluded
   (testing "Unknown type excluded"
-    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
+    (is (= [{:generatedTime (tc/from-string "2011-10-22T15:43:00+00:00")
               :typeId 11134
               :itemName "Amarr Shuttle"
               :regionId 10000065
@@ -160,7 +161,7 @@
               :sellingPrice 8999
               :buyingPrice 6000
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]})
+              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-item feed-item-with-unknown-type)))))
 (def feed-item-with-no-buy-orders
   {:resultType "orders", :version "0.1", :uploadKeys [{:name "emk", :key "abc"} {:name "ec", :key "def"}],
@@ -176,7 +177,7 @@
 
 (deftest no-buy-orders
   (testing "No buy orders"
-    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
+    (is (= [{:generatedTime (tc/from-string "2011-10-22T15:43:00+00:00")
               :typeId 11134
               :itemName "Amarr Shuttle"
               :regionId 10000065
@@ -184,7 +185,7 @@
               :sellingPrice 8999
               :buyingPrice nil
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
-              :buyOrders []})
+              :buyOrders []}]
            (feed->region-item feed-item-with-no-buy-orders)))))
 
 (def feed-item-with-no-sell-orders
@@ -200,7 +201,7 @@
 
 (deftest no-sell-orders
   (testing "No sell orders"
-    (is (= '({:generatedTime "2011-10-22T15:43:00+00:00"
+    (is (= [{:generatedTime (tc/from-string "2011-10-22T15:43:00+00:00")
               :typeId 11134
               :itemName "Amarr Shuttle"
               :regionId 10000065
@@ -208,5 +209,5 @@
               :sellingPrice nil
               :buyingPrice 6000
               :sellOrders []
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]})
+              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-item feed-item-with-no-sell-orders)))))
