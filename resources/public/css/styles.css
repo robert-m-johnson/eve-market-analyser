@@ -14,3 +14,7 @@ td, th {
 td.highestSellingPrice, td.lowestBuyingPrice {
     background-color: #99CCFF;
 }
+
+td.lowestSellingPrice, td.highestBuyingPrice {
+    background-color: #FFCC99;
+}

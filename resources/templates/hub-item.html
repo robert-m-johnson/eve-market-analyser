@@ -30,10 +30,12 @@
                 <td >
                     {{item.regionName}}
                 </td>
-                <td {% if item.highestSellingPrice %}class="highestSellingPrice"{% endif %}>
+                <td class="{% if item.highestSellingPrice %}highestSellingPrice{% endif %} 
+                           {% if item.lowestSellingPrice %}lowestSellingPrice{% endif %}">
                     {{item.sellingPrice}}
                 </td>
-                <td {% if item.lowestBuyingPrice %}class="lowestBuyingPrice"{% endif %}>
+                <td class="{% if item.highestBuyingPrice %}highestBuyingPrice{% endif %}
+                           {% if item.lowestSellingPrice %}lowestBuyingPrice{% endif %}">
                     {{item.buyingPrice}}
                 </td>
             </tr>
