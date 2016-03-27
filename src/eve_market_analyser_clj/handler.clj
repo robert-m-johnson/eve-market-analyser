@@ -19,21 +19,23 @@
   (apply min (map :buyingPrice items)))
 
 (defn mark-best-prices [items]
-  (let [highest-sp (highest-selling-price items)
-        lowest-sp (lowest-selling-price items)
-        highest-bp (highest-buying-price items)
-        lowest-bp (lowest-buying-price items)
-        mark-val (fn [item k v mark]
-                   (if (= (k item) v)
-                     (assoc item mark true)
-                     item))]
-    (map
-     (comp
-      #(mark-val % :sellingPrice highest-sp :highestSellingPrice)
-      #(mark-val % :sellingPrice lowest-sp :lowestSellingPrice)
-      #(mark-val % :buyingPrice highest-bp :highestBuyingPrice)
-      #(mark-val % :buyingPrice lowest-bp :lowestBuyingPrice))
-     items)))
+  (if (or (not items) (empty? items))
+    items
+    (let [highest-sp (highest-selling-price items)
+          lowest-sp (lowest-selling-price items)
+          highest-bp (highest-buying-price items)
+          lowest-bp (lowest-buying-price items)
+          mark-val (fn [item k v mark]
+                     (if (= (k item) v)
+                       (assoc item mark true)
+                       item))]
+      (map
+       (comp
+        #(mark-val % :sellingPrice highest-sp :highestSellingPrice)
+        #(mark-val % :sellingPrice lowest-sp :lowestSellingPrice)
+        #(mark-val % :buyingPrice highest-bp :highestBuyingPrice)
+        #(mark-val % :buyingPrice lowest-bp :lowestBuyingPrice))
+       items))))
 
 (defn fetch-hub-prices-model [item-name]
   (let [hub-items (->  (db/find-hub-prices-for-item-name
