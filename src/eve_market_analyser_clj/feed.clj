@@ -30,8 +30,14 @@
   names, returns a function that, given a vector will return a map of the keys
   and the corresponding values taken from the vector"
   [col-names name-map]
-  (let [key-index-map (fmap #(.indexOf col-names %) name-map)]
-    (fn [v] (fmap #(nth v %) key-index-map))))
+  (let [key-index-map
+        ;; Find the index of each col name in the vector;
+        ;; gives e.g. {:price 0, :quantity 1, :isBid 6}
+        (fmap #(.indexOf col-names %) name-map)]
+    (fn [v]
+      ;; Replace the each index in key-index-map with the
+      ;; corresponding value in the vector v
+      (fmap #(nth v %) key-index-map))))
 
 (defn feed->region-item [feed-item]
   (let [order-vec->order
