@@ -8,13 +8,14 @@
     default
     (apply f s)))
 
+;; Still about 10x slower than separate reductions
 (defn reduce-multi
   "Given a sequence of fns and a coll, returns a vector of the result of each fn
-  when reduced over the coll. The reduction is performed in a single pass"
+  when reduced over the coll. The reduction is performed in a single pass."
   [fns coll]
   (let [n (count fns)
         r (rest coll)
-        initial-v (into [] (repeat n (first coll)))
+        initial-v (transient (into [] (repeat n (first coll))))
         fns (into [] fns)
         reduction-fn
         (fn [v x]
@@ -22,6 +23,6 @@
             (let [y (nth acc i)
                   f (nth fns i)]
               (if (= i (- n 1))
-                (assoc acc i (f y x))
-                (recur (assoc acc i (f y x)) (inc i))))))]
-    (reduce reduction-fn initial-v r)))
+                (assoc! acc i (f y x))
+                (recur (assoc! acc i (f y x)) (inc i))))))]
+    (persistent! (reduce reduction-fn initial-v r))))
