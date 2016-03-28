@@ -3,6 +3,7 @@
   (:require [clojure.algo.generic.functor :refer [fmap]]
             [eve-market-analyser-clj.world :as world]
             [eve-market-analyser-clj.db :as db]
+            [eve-market-analyser-clj.util :refer :all]
             [zeromq.zmq :as zmq]
             [cheshire.core :as chesh]
             [clojure.tools.logging :as log]
@@ -19,11 +20,6 @@
 
 (defn- to-string [^bytes x]
   (String. x (Charset/forName "UTF-8")))
-
-(defn- apply-or-default [default f s]
-  (if (empty? s)
-    default
-    (apply f s)))
 
 (defn- vector-extractor*
   "Given a vector of column names, and a map of keys and corresponding column
@@ -53,8 +49,8 @@
            (let [orders (->> (:rows rowset) (map order-vec->order))
                  buyOrders (->>  (filter :isBid orders) (map #(dissoc % :isBid)) (sort-by :price >))
                  sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)) (sort-by :price))
-                 buyingPrice (->> (map :price buyOrders) (apply-or-default nil max))
-                 sellingPrice (->> (map :price sellOrders) (apply-or-default nil min))]
+                 buyingPrice (->> (map :price buyOrders) (apply-or-default max nil))
+                 sellingPrice (->> (map :price sellOrders) (apply-or-default min nil))]
              {:generatedTime (clj-time.format/parse (:generatedAt rowset))
               :typeId (:typeID rowset)
               :itemName (world/types (:typeID rowset))
