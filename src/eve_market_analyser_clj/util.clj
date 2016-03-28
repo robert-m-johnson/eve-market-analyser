@@ -19,10 +19,11 @@
         fns (into [] fns)
         reduction-fn
         (fn [v x]
-          (loop [acc v, i 0]
-            (let [y (nth acc i)
-                  f (nth fns i)]
+          (loop [v-current v, i 0]
+            (let [y (nth v-current i)
+                  f (nth fns i)
+                  v-new (assoc! v-current i (f y x))]
               (if (= i (- n 1))
-                (assoc! acc i (f y x))
-                (recur (assoc! acc i (f y x)) (inc i))))))]
+                v-new
+                (recur v-new (inc i))))))]
     (persistent! (reduce reduction-fn initial-v r))))
