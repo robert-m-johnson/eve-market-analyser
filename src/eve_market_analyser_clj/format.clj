@@ -1,6 +1,7 @@
 (ns eve-market-analyser-clj.format
   (:require [eve-market-analyser-clj.util :as util])
-  (:import java.math.MathContext))
+  (:import java.math.MathContext
+           com.github.kevinsawicki.timeago.TimeAgo))
 
 (defn- int-if-whole [n]
   (if (util/whole? n)
@@ -27,3 +28,6 @@
 
       :else
       (abbreviate-num normed 1000000000 "b"))))
+
+(defn time-ago [date]
+  (.timeAgo (TimeAgo.) date))

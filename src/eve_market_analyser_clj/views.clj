@@ -2,7 +2,8 @@
   (:require [hiccup.core :as hicc]
             [hiccup.page :as hicp]
             [clojure.string :as st]
-            [eve-market-analyser-clj.format :as fmt]))
+            [eve-market-analyser-clj.format :as fmt]
+            [clj-time.coerce :as tcoerce]))
 
 (defn render [h]
   (hicp/html5 h))
@@ -52,4 +53,4 @@
             (fmt/price (:buyingPrice item))]])
         hubItems)]
       [:p "No data found"])
-    [:p earliestGenerated])))
+    [:p (fmt/time-ago (tcoerce/to-long earliestGenerated))])))
