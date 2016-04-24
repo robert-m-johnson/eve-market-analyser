@@ -1,5 +1,6 @@
 (ns eve-market-analyser-clj.handler
   (:require [eve-market-analyser-clj.db :as db]
+            [eve-market-analyser-clj.views :as views]
             [compojure.core :as cc]
             [compojure.handler :as handler]
             [compojure.route :as route]
@@ -39,20 +40,21 @@
 
 (defn fetch-hub-prices-model [item-name]
   (let [hub-items (-> (db/find-hub-prices-for-item-name
-                        item-name :itemName :regionName :buyingPrice :sellingPrice :generatedTime)
-                       mark-best-prices)
+                       item-name :itemName :regionName :buyingPrice :sellingPrice :generatedTime)
+                      mark-best-prices)
         earliest-generated (if (empty? hub-items)
                              nil
-                             (t/earliest (map :generatedTime hub-items)))]
+                             (t/earliest (map :generatedTime hub-items)))
+        formatted-items (map #(comp () ))]
     {:itemName item-name
      :hubItems hub-items
      :earliestGenerated earliest-generated}))
 
 (cc/defroutes app-routes
-  (cc/GET "/" [] (ring.util.response/resource-response "public/index.html"))
+  (cc/GET "/" [] (views/render (views/index)))
   (cc/GET "/hub-item" [itemName]
     (let [model (fetch-hub-prices-model itemName)]
-      (parser/render-file "templates/hub-item.html" model)))
+      (views/render (views/hub-item model))))
   (route/resources "/")
   (route/not-found "Not Found"))
 

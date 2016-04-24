@@ -1,18 +1,19 @@
 (ns eve-market-analyser-clj.format
-  (:require [eve-market-analyser-clj.util :as util]))
+  (:require [eve-market-analyser-clj.util :as util])
+  (:import java.math.MathContext))
 
 (defn- int-if-whole [n]
   (if (util/whole? n)
     (int n)
     n))
 
-(defn abbreviate-num [n magnitude letter]
+(defn- abbreviate-num [n magnitude letter]
   (str
    (int-if-whole (/ n (double magnitude)))
    letter))
 
 (defn price [n]
-  (let [rounded (util/round-sig-fig n 3)
+  (let [rounded (-> (bigdec n) (.round (MathContext. 3)))
         normed (int-if-whole rounded)]
     (cond
       (< normed 1000)

@@ -11,17 +11,6 @@
 (defn whole? [n]
   (== n (int n)))
 
-(defn round-sig-fig [n figs]
-  (if (= 0 n)
-    0
-    (let [magnitude (-> (Math/log10 n) (Math/round))
-          exp (-> (- magnitude figs) (+ 1))
-          ratio (Math/pow 10 exp)]
-      (-> n
-          (/ ratio)
-          Math/round
-          (* ratio)))))
-
 ;; Still about 10x slower than separate reductions
 (defn reduce-multi
   "Given a sequence of fns and a coll, returns a vector of the result of each fn
