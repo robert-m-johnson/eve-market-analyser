@@ -32,25 +32,26 @@
    (list
     (hub-item-search-form)
     [:p itemName]
-    (if (not-empty hubItems)
-      [:table
-       [:tr [:th "Hub"] [:th "Selling Price"] [:th "Buying Price"]]
-       (map
-        (fn [item]
-          [:tr
-           [:td (:regionName item)]
-           [:td
-            {:class (st/join
-                     " "
-                     [(if (:highestSellingPrice item) "highestSellingPrice")
-                      (if (:lowestSellingPrice item) "lowestSellingPrice")])}
-            (fmt/price (:sellingPrice item))]
-           [:td
-            {:class (st/join
-                     " "
-                     [(if (:highestBuyingPrice item) "highestBuyingPrice")
-                      (if (:lowestBuyingPrice item) "lowestBuyingPrice")])}
-            (fmt/price (:buyingPrice item))]])
-        hubItems)]
-      [:p "No data found"])
-    [:p (fmt/time-ago (tcoerce/to-long earliestGenerated))])))
+    (if (empty? hubItems)
+      [:p "No data found"]
+      (list
+       [:table
+        [:tr [:th "Hub"] [:th "Selling Price"] [:th "Buying Price"]]
+        (map
+         (fn [item]
+           [:tr
+            [:td (:regionName item)]
+            [:td
+             {:class (st/join
+                      " "
+                      [(if (:highestSellingPrice item) "highestSellingPrice")
+                       (if (:lowestSellingPrice item) "lowestSellingPrice")])}
+             (fmt/price (:sellingPrice item))]
+            [:td
+             {:class (st/join
+                      " "
+                      [(if (:highestBuyingPrice item) "highestBuyingPrice")
+                       (if (:lowestBuyingPrice item) "lowestBuyingPrice")])}
+             (fmt/price (:buyingPrice item))]])
+         hubItems)]
+       [:p (fmt/time-ago (tcoerce/to-long earliestGenerated))])))))
