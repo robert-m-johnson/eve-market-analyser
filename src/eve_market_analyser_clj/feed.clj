@@ -65,7 +65,7 @@
 (defn listen []
   (let [context (zmq/context 1)]
     (while true ; Retry connection if we timed out
-      (log/info "Connecting to EMDR server…")
+      (log/info "Connecting to EMDR server...")
       (with-open [subscriber (doto (zmq/socket context :sub)
                                (zmq/connect "tcp://relay-eu-germany-1.eve-emdr.com:8050")
                                (zmq/set-receive-timeout 30000)
