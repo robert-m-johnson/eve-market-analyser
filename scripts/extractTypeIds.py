@@ -1,4 +1,5 @@
 # Extracts information from an EVE type data YAML export into a CSV
+# Obtain typeIDs.yaml from somewhere like https://www.fuzzwork.co.uk/dump/
 import yaml
 
 with open("/home/robertjohnson/Downloads/eve-data/typeIDs.yaml", 'r') as input_file:
