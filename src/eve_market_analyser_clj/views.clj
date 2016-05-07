@@ -41,13 +41,16 @@
         (map
          (fn [item]
            [:tr
+            ;; Hub
             [:td (:regionName item)]
+            ;; Selling Price
             [:td
              {:class (st/join
                       " "
                       [(if (:highestSellingPrice item) "highestSellingPrice")
                        (if (:lowestSellingPrice item) "lowestSellingPrice")])}
              (fmt/price (:sellingPrice item))]
+            ;; Buying Price
             [:td
              {:class (st/join
                       " "
