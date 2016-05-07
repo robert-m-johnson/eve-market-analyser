@@ -1,17 +1,21 @@
 (ns eve-market-analyser-clj.model
-  (:require [clj-time.core :as t]))
+  (:require [eve-market-analyser-clj.util :refer [apply-or-default]]
+   [clj-time.core :as t]))
+
+(defn- extract [items f k]
+  (apply-or-default f nil (filter some? (map k items))))
 
 (defn highest-selling-price [items]
-  (apply max (map :sellingPrice items)))
+  (extract items max :sellingPrice))
 
 (defn lowest-selling-price [items]
-  (apply min (map :sellingPrice items)))
+  (extract items min :sellingPrice))
 
 (defn highest-buying-price [items]
-  (apply max (map :buyingPrice items)))
+  (extract items max :buyingPrice))
 
 (defn lowest-buying-price [items]
-  (apply min (map :buyingPrice items)))
+  (extract items min :buyingPrice))
 
 (defn mark-best-prices [items]
   (if (or (not items) (empty? items))
@@ -21,7 +25,7 @@
           highest-bp (highest-buying-price items)
           lowest-bp (lowest-buying-price items)
           mark-val (fn [item k v mark]
-                     (if (= (k item) v)
+                     (if (and v (= (k item) v))
                        (assoc item mark true)
                        item))]
       (map
