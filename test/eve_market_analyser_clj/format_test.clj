@@ -3,6 +3,7 @@
             [eve-market-analyser-clj.format :refer :all]))
 
 (deftest price-test
+  (is (= (price nil) ""))
   (is (= (price 0) "0"))
   (is (= (price 0.5) "0.5"))
   (is (= (price 1) "1"))
@@ -17,5 +18,4 @@
   (is (= (price 123456) "123k"))
   (is (= (price 1234567) "1.23m"))
   (is (= (price 123456789) "123m"))
-  (is (= (price 1234567890) "1.23b"))
-  )
+  (is (= (price 1234567890) "1.23b")))

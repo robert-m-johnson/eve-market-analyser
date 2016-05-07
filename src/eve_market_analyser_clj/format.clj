@@ -14,20 +14,24 @@
    letter))
 
 (defn price [n]
-  (let [rounded (-> (bigdec n) (.round (MathContext. 3)))
-        normed (int-if-whole rounded)]
-    (cond
-      (< normed 1000)
-      (str normed)
+  (if n
+    (let [rounded (-> (bigdec n) (.round (MathContext. 3)))
+          normed (int-if-whole rounded)]
+      (cond
+        (< normed 1000)
+        (str normed)
 
-      (< normed 1000000)
-      (abbreviate-num normed 1000 "k")
+        (< normed 1000000)
+        (abbreviate-num normed 1000 "k")
 
-      (< normed 1000000000)
-      (abbreviate-num normed 1000000 "m")
+        (< normed 1000000000)
+        (abbreviate-num normed 1000000 "m")
 
-      :else
-      (abbreviate-num normed 1000000000 "b"))))
+        :else
+        (abbreviate-num normed 1000000000 "b")))
+
+    ;; n is nil
+    ""))
 
 (defn time-ago [date]
   (.timeAgo (TimeAgo.) date))
