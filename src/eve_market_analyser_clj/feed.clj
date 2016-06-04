@@ -62,12 +62,14 @@
               :buyOrders buyOrders}))
          rowsets)))
 
+(def server "tcp://relay-eu-germany-1.eve-emdr.com:8050")
+
 (defn listen []
   (let [context (zmq/context 1)]
     (while true ; Retry connection if we timed out
-      (log/info "Connecting to EMDR server...")
+      (log/infof "Connecting to EMDR server %s..." server)
       (with-open [subscriber (doto (zmq/socket context :sub)
-                               (zmq/connect "tcp://relay-eu-germany-1.eve-emdr.com:8050")
+                               (zmq/connect server)
                                (zmq/set-receive-timeout 30000)
                                (zmq/subscribe ""))]
         (loop []
