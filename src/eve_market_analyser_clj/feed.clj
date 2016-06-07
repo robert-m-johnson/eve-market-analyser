@@ -62,29 +62,42 @@
               :buyOrders buyOrders}))
          rowsets)))
 
-(def server "tcp://relay-eu-germany-1.eve-emdr.com:8050")
+(def servers (atom (cycle
+                    ["tcp://relay-eu-germany-1.eve-emdr.com:8050"
+                     "tcp://relay-eu-germany-2.eve-emdr.com:8050"
+                     "tcp://relay-eu-germany-3.eve-emdr.com:8050"
+                     "tcp://relay-eu-germany-4.eve-emdr.com:8050"
+                     "tcp://relay-eu-denmark-1.eve-emdr.com:8050"
+                     "tcp://relay-us-west-1.eve-emdr.com:8050"
+                     "tcp://relay-us-central-1.eve-emdr.com:8050"])))
+
+(defn next-server! []
+  (let [svs @servers]
+    (swap! servers rest)
+    (first svs)))
 
 (defn listen []
   (let [context (zmq/context 1)]
     (while true ; Retry connection if we timed out
-      (log/infof "Connecting to EMDR server %s..." server)
-      (with-open [subscriber (doto (zmq/socket context :sub)
-                               (zmq/connect server)
-                               (zmq/set-receive-timeout 30000)
-                               (zmq/subscribe ""))]
-        (loop []
-          (log/debug "Receiving item...")
-          (let [bytes (zmq/receive subscriber)]
-            (if bytes
-              (do
-                (try
-                  (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
-                    (if (= "orders" (:resultType feed-item))
-                      (let [region-items (feed->region-item feed-item)]
-                        (log/debug "Valid item received")
-                        (db/insert-items region-items))))
-                  (catch Exception ex
-                    (log/error ex)))
-                ;; Only continue loop if we received a message; else retry connection
-                (recur))
-              (log/info "Socket timed out"))))))))
+      (let [server (next-server!)]
+        (log/infof "Connecting to EMDR server %s..." server)
+        (with-open [subscriber (doto (zmq/socket context :sub)
+                                 (zmq/connect server)
+                                 (zmq/set-receive-timeout 30000)
+                                 (zmq/subscribe ""))]
+          (loop []
+            (log/debug "Receiving item...")
+            (let [bytes (zmq/receive subscriber)]
+              (if bytes
+                (do
+                  (try
+                    (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
+                      (if (= "orders" (:resultType feed-item))
+                        (let [region-items (feed->region-item feed-item)]
+                          (log/debug "Valid item received")
+                          (db/insert-items region-items))))
+                    (catch Exception ex
+                      (log/error ex)))
+                  ;; Only continue loop if we received a message; else retry connection
+                  (recur))
+                (log/info "Socket timed out")))))))))
