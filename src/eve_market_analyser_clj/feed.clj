@@ -1,6 +1,8 @@
 (ns eve-market-analyser-clj.feed
   (:gen-class)
-  (:require [clojure.algo.generic.functor :refer [fmap]]
+  (:require [clojure.core.async :as async :refer
+             [alt!! chan thread sliding-buffer <!! >!!]]
+            [clojure.algo.generic.functor :refer [fmap]]
             [eve-market-analyser-clj.world :as world]
             [eve-market-analyser-clj.db :as db]
             [eve-market-analyser-clj.util :refer :all]
@@ -76,9 +78,20 @@
     (swap! servers rest)
     (first svs)))
 
-(defn listen []
+(defn create-thread-looper [f]
+  (let [stop-chan (chan)]
+    (thread
+      (while (alt!!
+               stop-chan false
+               :default :keep-alive)
+        (f)))
+    stop-chan))
+
+(defonce item-chan (chan (sliding-buffer 1000)))
+
+(defn listen* []
   (let [context (zmq/context 1)]
-    (while true ; Retry connection if we timed out
+    (fn []
       (let [server (next-server!)]
         (log/infof "Connecting to EMDR server %s..." server)
         (with-open [subscriber (doto (zmq/socket context :sub)
@@ -90,14 +103,27 @@
             (let [bytes (zmq/receive subscriber)]
               (if bytes
                 (do
-                  (try
-                    (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
-                      (if (= "orders" (:resultType feed-item))
-                        (let [region-items (feed->region-item feed-item)]
-                          (log/debug "Valid item received")
-                          (db/insert-items region-items))))
-                    (catch Exception ex
-                      (log/error ex)))
+                  (log/debug "Item received")
+                  (>!! item-chan bytes)
                   ;; Only continue loop if we received a message; else retry connection
                   (recur))
                 (log/info "Socket timed out")))))))))
+
+(defn listen []
+  (create-thread-looper (listen*)))
+
+(defn consume []
+  (let [consume-fn
+          (fn []
+            (try
+              (let [bytes (<!! item-chan)
+                    feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
+                (if (= "orders" (:resultType feed-item))
+                  (let [region-items (feed->region-item feed-item)]
+                    (log/debug "Inserting items into DB...")
+                    (db/insert-items region-items)
+                    (log/debug "Inserted items into DB"))))
+              (catch Exception ex
+                (log/error ex))))]
+    (create-thread-looper consume-fn)))
+

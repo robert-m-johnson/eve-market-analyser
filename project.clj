@@ -4,6 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
+                 [org.clojure/core.async "0.2.382"]
                  [org.clojure/algo.generic "0.1.2"]
                  [org.zeromq/cljzmq "0.1.4"]
                  [clj-time "0.11.0"]
@@ -11,7 +12,7 @@
                  ;; JSON parsing
                  [cheshire "5.5.0"]
                  ;; MongoDB
-                 [com.novemberain/monger "3.0.0-rc2"]
+                 [com.novemberain/monger "3.0.1"]
                  ;; Web
                  [ring "1.4.0"]
                  [compojure "1.4.0"]

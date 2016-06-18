@@ -7,9 +7,18 @@
             [clj-time.coerce]
             ;; Enable joda integration
             [monger.joda-time])
-  (:import com.mongodb.BasicDBObject))
+  (:import [com.mongodb
+            BasicDBObject MongoOptions ServerAddress]))
 
-(defonce ^:private conn (delay (mg/connect)))
+(defonce ^:private conn
+  (delay
+   (let [^ServerAddress server
+         (mg/server-address "127.0.0.1" 27017)
+         ^MongoOptions opts
+         ;; Only one thread will write to the DB so
+         ;; just use a single connection
+         (mg/mongo-options {:connections-per-host 1})]
+     (mg/connect server opts))))
 
 (defn- get-db [] (mg/get-db @conn "eve"))
 
