@@ -64,12 +64,17 @@
               :buyOrders buyOrders}))
          rowsets)))
 
+;; Full list of servers:
+;; "tcp://relay-eu-germany-1.eve-emdr.com:8050"
+;; "tcp://relay-eu-germany-2.eve-emdr.com:8050"
+;; "tcp://relay-eu-germany-3.eve-emdr.com:8050"
+;; "tcp://relay-eu-germany-4.eve-emdr.com:8050"
+;; "tcp://relay-eu-denmark-1.eve-emdr.com:8050"
+;; "tcp://relay-us-west-1.eve-emdr.com:8050"
+;; "tcp://relay-us-central-1.eve-emdr.com:8050"
+
 (def servers (atom (cycle
                     ["tcp://relay-eu-germany-1.eve-emdr.com:8050"
-                     "tcp://relay-eu-germany-2.eve-emdr.com:8050"
-                     "tcp://relay-eu-germany-3.eve-emdr.com:8050"
-                     "tcp://relay-eu-germany-4.eve-emdr.com:8050"
-                     "tcp://relay-eu-denmark-1.eve-emdr.com:8050"
                      "tcp://relay-us-west-1.eve-emdr.com:8050"
                      "tcp://relay-us-central-1.eve-emdr.com:8050"])))
 
@@ -96,7 +101,7 @@
         (log/infof "Connecting to EMDR server %s..." server)
         (with-open [subscriber (doto (zmq/socket context :sub)
                                  (zmq/connect server)
-                                 (zmq/set-receive-timeout 30000)
+                                 (zmq/set-receive-timeout 300000)
                                  (zmq/subscribe ""))]
           (loop []
             (log/debug "Receiving item...")
