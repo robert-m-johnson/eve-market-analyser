@@ -118,11 +118,13 @@
             (try
               (let [bytes (<!! item-chan)
                     feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
-                (if (= "orders" (:resultType feed-item))
-                  (let [region-items (feed->region-item feed-item)]
-                    (log/debug "Inserting items into DB...")
-                    (db/insert-items region-items)
-                    (log/debug "Inserted items into DB"))))
+                (let [{resultType :resultType} feed-item]
+                  (if (= "orders" resultType)
+                    (let [region-items (feed->region-item feed-item)]
+                      (log/debug "Inserting items into DB...")
+                      (db/insert-items region-items)
+                      (log/debug "Inserted items into DB"))
+                    (log/debug "Ignoring feed item of type '" resultType "'"))))
               (catch Exception ex
                 (log/error ex))))]
     (create-thread-looper consume-fn)))
