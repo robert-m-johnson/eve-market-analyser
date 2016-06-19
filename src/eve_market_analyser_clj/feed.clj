@@ -117,20 +117,27 @@
 (defn listen []
   (create-thread-looper (listen*)))
 
+(defn bytes->region-items [bytes]
+  (log/debug "Converting bytes to region items...")
+  (let [region-items
+        (try
+          (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
+            (let [{resultType :resultType} feed-item]
+              (if (= "orders" resultType)
+                (let [region-items (feed->region-item feed-item)]
+                  region-items)
+                (log/debug "Ignoring feed item of type '" resultType "'"))))
+          (catch Exception ex
+            (log/error ex)))]
+    (log/debug "Converted bytes to region items")
+    region-items))
+
 (defn consume []
   (let [consume-fn
-          (fn []
-            (try
-              (let [bytes (<!! item-chan)
-                    feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
-                (let [{resultType :resultType} feed-item]
-                  (if (= "orders" resultType)
-                    (let [region-items (feed->region-item feed-item)]
-                      (log/debug "Inserting items into DB...")
-                      (db/insert-items region-items)
-                      (log/debug "Inserted items into DB"))
-                    (log/debug "Ignoring feed item of type '" resultType "'"))))
-              (catch Exception ex
-                (log/error ex))))]
+        (fn []
+          (let [bytes (<!! item-chan)
+                region-items (bytes->region-items bytes)]
+            (if region-items
+              (db/insert-items region-items))))]
     (create-thread-looper consume-fn)))
 

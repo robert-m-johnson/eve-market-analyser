@@ -40,6 +40,7 @@
     (.put "buyOrders" (map orderItem->doc (:buyOrders marketItem)))))
 
 (defn insert-items [items]
+  (log/debug "Inserting items into DB...")
   (doseq [item items]
     (let [doc (marketItem->doc item)
           updateQuery {"typeId" (:typeId item)
@@ -48,7 +49,8 @@
       (try
         (mc/update (get-db) marketItemColl updateQuery doc {:upsert true})
         (catch com.mongodb.DuplicateKeyException e
-          (log/debug "Item older than current; ignoring"))))))
+          (log/debug "Item older than current; ignoring")))))
+  (log/debug "Inserted items into DB"))
 
 (def ^:private hub-ordering
   (let [names world/trade-hub-region-names]
