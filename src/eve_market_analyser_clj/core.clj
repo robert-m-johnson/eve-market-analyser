@@ -5,7 +5,8 @@
             [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn -main [& args]
-  (feed/listen)
   (feed/consume)
+  (feed/convert)
+  (feed/listen)
   (defonce server (run-jetty #'handler/app {:port 8080 :join? false})))
 

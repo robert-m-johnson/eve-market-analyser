@@ -64,6 +64,21 @@
               :buyOrders buyOrders}))
          rowsets)))
 
+(defn bytes->region-items [bytes]
+  (log/debug "Converting bytes to region items...")
+  (let [region-items
+        (try
+          (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
+            (let [{resultType :resultType} feed-item]
+              (if (= "orders" resultType)
+                (let [region-items (feed->region-item feed-item)]
+                  region-items)
+                (log/debugf "Ignoring feed item of type '%s'" resultType))))
+          (catch Exception ex
+            (log/error ex)))]
+    (log/debug "Converted bytes to region items")
+    region-items))
+
 ;; Full list of servers:
 ;; "tcp://relay-eu-germany-1.eve-emdr.com:8050"
 ;; "tcp://relay-eu-germany-2.eve-emdr.com:8050"
@@ -92,7 +107,8 @@
         (f)))
     stop-chan))
 
-(defonce item-chan (chan (sliding-buffer 1000)))
+(defonce bytes-chan (chan (sliding-buffer 1000)))
+(defonce region-items-chan (chan 100))
 
 (defn listen* []
   (let [context (zmq/context 1)]
@@ -109,7 +125,7 @@
               (if bytes
                 (do
                   (log/debug "Item received")
-                  (>!! item-chan bytes)
+                  (>!! bytes-chan bytes)
                   ;; Only continue loop if we received a message; else retry connection
                   (recur))
                 (log/info "Socket timed out")))))))))
@@ -117,27 +133,18 @@
 (defn listen []
   (create-thread-looper (listen*)))
 
-(defn bytes->region-items [bytes]
-  (log/debug "Converting bytes to region items...")
-  (let [region-items
-        (try
-          (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
-            (let [{resultType :resultType} feed-item]
-              (if (= "orders" resultType)
-                (let [region-items (feed->region-item feed-item)]
-                  region-items)
-                (log/debug "Ignoring feed item of type '" resultType "'"))))
-          (catch Exception ex
-            (log/error ex)))]
-    (log/debug "Converted bytes to region items")
-    region-items))
+(defn convert []
+  (create-thread-looper
+   (fn []
+     (let [bytes (<!! bytes-chan)
+           region-items (bytes->region-items bytes)]
+       (if region-items
+         (>!! region-items-chan region-items))))))
 
 (defn consume []
-  (let [consume-fn
-        (fn []
-          (let [bytes (<!! item-chan)
-                region-items (bytes->region-items bytes)]
-            (if region-items
-              (db/insert-items region-items))))]
-    (create-thread-looper consume-fn)))
+  (create-thread-looper
+   (fn []
+     (let [region-items (<!! region-items-chan)]
+       (if region-items
+         (db/insert-items region-items))))))
 
