@@ -107,8 +107,8 @@
         (f)))
     stop-chan))
 
-(defonce bytes-chan (chan (sliding-buffer 1000)))
-(defonce region-items-chan (chan 100))
+(defonce bytes-chan (chan (sliding-buffer 500)))
+(defonce region-items-chan (chan 50))
 
 (defn listen* []
   (let [context (zmq/context 1)]
