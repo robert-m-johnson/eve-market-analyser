@@ -98,21 +98,23 @@
     (swap! servers rest)
     (first svs)))
 
+(defn- open?!! [stop-chan]
+  (alt!! stop-chan false :default :keep-going))
+
 (defn create-thread-looper [f]
   (let [stop-chan (chan)]
     (thread
-      (while (alt!!
-               stop-chan false
-               :default :keep-alive)
-        (f)))
+      (while (open?!! stop-chan)
+        (f stop-chan)))
     stop-chan))
 
 (defonce bytes-chan (chan (sliding-buffer 500)))
 (defonce region-items-chan (chan 50))
 
+
 (defn listen* []
   (let [context (zmq/context 1)]
-    (fn []
+    (fn [stop-chan]
       (let [server (next-server!)]
         (log/infof "Connecting to EMDR server %s..." server)
         (with-open [subscriber (doto (zmq/socket context :sub)
@@ -120,22 +122,22 @@
                                  (zmq/set-receive-timeout 300000)
                                  (zmq/subscribe ""))]
           (loop []
-            (log/debug "Receiving item...")
-            (let [bytes (zmq/receive subscriber)]
-              (if bytes
-                (do
-                  (log/debug "Item received")
-                  (>!! bytes-chan bytes)
-                  ;; Only continue loop if we received a message; else retry connection
-                  (recur))
-                (log/info "Socket timed out")))))))))
+              (log/debug "Receiving item...")
+              (let [bytes (zmq/receive subscriber)]
+                (if (and bytes (open?!! stop-chan))
+                  (do
+                    (log/debug "Item received")
+                    (>!! bytes-chan bytes)
+                    ;; Only continue loop if we received a message; else retry connection
+                    (recur))
+                  (log/info "Socket timed out")))))))))
 
 (defn listen []
   (create-thread-looper (listen*)))
 
 (defn convert []
   (create-thread-looper
-   (fn []
+   (fn [_]
      (let [bytes (<!! bytes-chan)
            region-items (bytes->region-items bytes)]
        (if region-items
@@ -143,7 +145,7 @@
 
 (defn consume []
   (create-thread-looper
-   (fn []
+   (fn [_]
      (let [region-items (<!! region-items-chan)]
        (if region-items
          (db/insert-items region-items))))))
