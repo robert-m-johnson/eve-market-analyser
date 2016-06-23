@@ -1,7 +1,7 @@
-(ns eve-market-analyser-clj.core
+(ns eve-market-analyser.core
   (:gen-class)
-  (:require [eve-market-analyser-clj.feed :as feed]
-            [eve-market-analyser-clj.handler :as handler]
+  (:require [eve-market-analyser.feed :as feed]
+            [eve-market-analyser.handler :as handler]
             [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn -main [& args]

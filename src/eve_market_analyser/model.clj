@@ -1,5 +1,5 @@
-(ns eve-market-analyser-clj.model
-  (:require [eve-market-analyser-clj.util :refer [apply-or-default]]
+(ns eve-market-analyser.model
+  (:require [eve-market-analyser.util :refer [apply-or-default]]
    [clj-time.core :as t]))
 
 (defn- extract [items f k]

@@ -1,6 +1,6 @@
-(ns eve-market-analyser-clj.feed-test
+(ns eve-market-analyser.feed-test
   (:require [clojure.test :refer :all]
-            [eve-market-analyser-clj.feed :refer :all]
+            [eve-market-analyser.feed :refer :all]
             [clj-time.coerce :as tc]))
 
 

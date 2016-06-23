@@ -1,5 +1,5 @@
-(ns eve-market-analyser-clj.util-test
-  (:require [eve-market-analyser-clj.util :refer :all]
+(ns eve-market-analyser.util-test
+  (:require [eve-market-analyser.util :refer :all]
             [clojure.test :refer :all]))
 
 (deftest whole?-test

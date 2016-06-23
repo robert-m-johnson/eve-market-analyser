@@ -1,4 +1,4 @@
-(ns eve-market-analyser-clj.util)
+(ns eve-market-analyser.util)
 
 (defn apply-or-default
   "Applies the function f to the sequence s. If s is nil or empty,

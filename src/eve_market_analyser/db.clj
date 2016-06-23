@@ -1,9 +1,9 @@
-(ns eve-market-analyser-clj.db
+(ns eve-market-analyser.db
   (:require [monger.core :as mg]
             [monger.collection :as mc]
             [monger.operators :refer :all]
             [clojure.tools.logging :as log]
-            [eve-market-analyser-clj.world :as world]
+            [eve-market-analyser.world :as world]
             [clj-time.coerce]
             ;; Enable joda integration
             [monger.joda-time])

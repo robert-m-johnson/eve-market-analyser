@@ -1,11 +1,11 @@
-(ns eve-market-analyser-clj.feed
+(ns eve-market-analyser.feed
   (:gen-class)
   (:require [clojure.core.async :as async :refer
              [alt!! chan thread sliding-buffer <!! >!!]]
             [clojure.algo.generic.functor :refer [fmap]]
-            [eve-market-analyser-clj.world :as world]
-            [eve-market-analyser-clj.db :as db]
-            [eve-market-analyser-clj.util :refer :all]
+            [eve-market-analyser.world :as world]
+            [eve-market-analyser.db :as db]
+            [eve-market-analyser.util :refer :all]
             [zeromq.zmq :as zmq]
             [cheshire.core :as chesh]
             [clojure.tools.logging :as log]

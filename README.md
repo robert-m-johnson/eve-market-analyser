@@ -1,4 +1,4 @@
-# eve-market-analyser-clj
+# eve-market-analyser
 
 FIXME: description
 
@@ -10,7 +10,7 @@ Download from http://example.com/FIXME.
 
 FIXME: explanation
 
-    $ java -jar eve-market-analyser-clj-0.1.0-standalone.jar [args]
+    $ java -jar eve-market-analyser-0.1.0-standalone.jar [args]
 
 ## Options
 

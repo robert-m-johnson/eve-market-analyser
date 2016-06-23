@@ -1,6 +1,6 @@
-(ns eve-market-analyser-clj.world-test
+(ns eve-market-analyser.world-test
   (:require [clojure.test :refer :all]
-            [eve-market-analyser-clj.world :refer :all]))
+            [eve-market-analyser.world :refer :all]))
 
 (deftest types-test
   (testing "Types"

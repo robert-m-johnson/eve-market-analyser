@@ -1,4 +1,4 @@
-(ns eve-market-analyser-clj.world
+(ns eve-market-analyser.world
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set]))

@@ -1,5 +1,5 @@
-(ns eve-market-analyser-clj.format
-  (:require [eve-market-analyser-clj.util :as util])
+(ns eve-market-analyser.format
+  (:require [eve-market-analyser.util :as util])
   (:import java.math.MathContext
            com.github.kevinsawicki.timeago.TimeAgo))
 

@@ -1,7 +1,7 @@
-(ns eve-market-analyser-clj.handler
-  (:require [eve-market-analyser-clj.db :as db]
-            [eve-market-analyser-clj.model :as model]
-            [eve-market-analyser-clj.views :as views]
+(ns eve-market-analyser.handler
+  (:require [eve-market-analyser.db :as db]
+            [eve-market-analyser.model :as model]
+            [eve-market-analyser.views :as views]
             [compojure.core :as cc]
             [compojure.handler :as handler]
             [compojure.route :as route]

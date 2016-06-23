@@ -1,8 +1,8 @@
-(ns eve-market-analyser-clj.views
+(ns eve-market-analyser.views
   (:require [hiccup.core :as hicc]
             [hiccup.page :as hicp]
             [clojure.string :as st]
-            [eve-market-analyser-clj.format :as fmt]
+            [eve-market-analyser.format :as fmt]
             [clj-time.coerce :as tcoerce]))
 
 (defn render [h]

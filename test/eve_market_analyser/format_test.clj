@@ -1,6 +1,6 @@
-(ns eve-market-analyser-clj.format-test
+(ns eve-market-analyser.format-test
   (:require [clojure.test :refer :all]
-            [eve-market-analyser-clj.format :refer :all]))
+            [eve-market-analyser.format :refer :all]))
 
 (deftest price-test
   (is (= (price nil) ""))
