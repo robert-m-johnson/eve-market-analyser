@@ -8,7 +8,11 @@
             ;; Enable joda integration
             [monger.joda-time])
   (:import [com.mongodb
-            BasicDBObject MongoOptions ServerAddress]))
+            BasicDBObject MongoOptions ServerAddress WriteConcern]))
+
+;; Use fastest write concern so that pi can keep up
+;; TODO: Use bulk writes so that a safer setting can be used
+(mg/set-default-write-concern! WriteConcern/UNACKNOWLEDGED)
 
 (defonce ^:private conn
   (delay
