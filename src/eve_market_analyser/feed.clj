@@ -101,16 +101,23 @@
 (defn- open?!! [stop-chan]
   (alt!! stop-chan false :default :keep-going))
 
+(defn wrap-log-err [f]
+  (fn [stop-chan]
+    (try
+      (f stop-chan)
+      (catch Exception e
+        (log/error e "Enhandled exception in thread worker")))))
+
 (defn create-thread-looper [f]
-  (let [stop-chan (chan)]
+  (let [stop-chan (chan)
+        worker-fn (wrap-log-err f)]
     (thread
       (while (open?!! stop-chan)
-        (f stop-chan)))
+        (worker-fn stop-chan)))
     stop-chan))
 
 (defonce bytes-chan (chan (sliding-buffer 500)))
 (defonce region-items-chan (chan 50))
-
 
 (defn listen* []
   (let [context (zmq/context 1)]
