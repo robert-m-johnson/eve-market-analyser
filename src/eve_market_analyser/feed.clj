@@ -155,5 +155,8 @@
    (fn [_]
      (let [region-items (<!! region-items-chan)]
        (if region-items
-         (db/insert-items region-items))))))
+         (log/debug "Pretending to insert items")
+         ;; TODO: insert items again
+         ;;(db/insert-items region-items)
+         )))))
 
