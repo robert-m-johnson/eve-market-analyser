@@ -100,28 +100,7 @@
     (swap! servers rest)
     (first svs)))
 
-(defn- open?!! [stop-chan]
-  (alt!! stop-chan false :default :keep-going))
-
-(defn wrap-log-err [f]
-  (fn [stop-chan]
-    (try
-      (f stop-chan)
-      (catch Exception e
-        (log/error e "Unhandled exception in thread worker")))))
-
-(defn create-thread-looper [f]
-  (let [stop-chan (chan)
-        worker-fn (wrap-log-err f)]
-    (thread
-      (while (open?!! stop-chan)
-        (worker-fn stop-chan)))
-    stop-chan))
-
-(defonce bytes-chan (chan (sliding-buffer 500)))
-(defonce region-items-chan (chan 50))
-
-(defn listen* [out-chan]
+(defn- listen* [out-chan]
   (let [context (zmq/context 1)]
     (fn [continue?]
       (let [server (next-server!)]
@@ -141,32 +120,11 @@
                     (recur))
                   (log/info "Socket timed out")))))))))
 
-;; (defn listen []
-;;   (create-thread-looper (listen*)))
-
-;; (defn convert []
-;;   (create-thread-looper
-;;    (fn [_]
-;;      (let [bytes (<!! bytes-chan)
-;;            region-items (bytes->region-items bytes)]
-;;        (if region-items
-;;          (>!! region-items-chan region-items))))))
-
 (defn- convert-item [in-chan out-chan]
   (let [bytes (<!! in-chan)
         region-items (bytes->region-items bytes)]
     (if region-items
       (>!! out-chan region-items))))
-
-(defn consume []
-  (create-thread-looper
-   (fn [_]
-     (let [region-items (<!! region-items-chan)]
-       (if region-items
-         (log/debug "Pretending to insert items")
-         ;; TODO: insert items again
-         ;;(db/insert-items region-items)
-         )))))
 
 (defn- consume-item [in-chan db]
   (if-let [region-items (<!! in-chan)]

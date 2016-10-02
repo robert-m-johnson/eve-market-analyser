@@ -90,9 +90,11 @@
         (assoc component :connection conn))))
   (stop [{connection :connection :as component}]
     (log/debug "Stopping database")
-    (if connection
-      (do (.close connection)
-          (assoc component :connection nil))
+    (let [component (if connection
+                      (do (.close connection)
+                          (assoc component :connection nil))
+                      component)]
+      (log/debug "Stopped database")
       component)))
 
 (defprotocol ItemDatabase

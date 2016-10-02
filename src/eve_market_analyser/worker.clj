@@ -11,7 +11,7 @@
 (defn- open?!! [stop-chan]
   (alt!! stop-chan false :default true))
 
-(defn wrap-log-err [f]
+(defn- wrap-log-err [f]
   (fn [stop-chan]
     (try
       (f stop-chan)
