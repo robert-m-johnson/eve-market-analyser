@@ -3,19 +3,24 @@
   (:require [eve-market-analyser.db :as db]
             [eve-market-analyser.feed :as feed]
             [eve-market-analyser.handler :as handler]
+            [clojure.core.async :as async :refer [chan sliding-buffer]]
             [com.stuartsierra.component :as component]
             [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn system []
-  (component/system-map
-   :db (db/new-database)
-   :http-server (component/using
-                 (handler/new-web-server)
-                 [:db])))
+  (let [bytes-chan (chan (sliding-buffer 500))
+        region-items-chan (chan 50)]
+    (component/system-map
+     :item-producer (feed/new-item-producer bytes-chan)
+     :item-converter (feed/new-item-converter bytes-chan region-items-chan)
+     :db (db/new-database)
+     :item-consumer (component/using
+                     (feed/new-item-consumer region-items-chan)
+                     [:db])
+     :http-server (component/using
+                   (handler/new-web-server)
+                   [:db]))))
 
 (defn -main [& args]
-  (feed/consume)
-  (feed/convert)
-  (feed/listen)
   (component/start (system)))
 

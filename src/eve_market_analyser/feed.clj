@@ -6,10 +6,12 @@
             [eve-market-analyser.world :as world]
             [eve-market-analyser.db :as db]
             [eve-market-analyser.util :refer :all]
+            [eve-market-analyser.worker :as worker]
             [zeromq.zmq :as zmq]
             [cheshire.core :as chesh]
             [clojure.tools.logging :as log]
-            [clj-time.format])
+            [clj-time.format]
+            [com.stuartsierra.component :as component])
   (:import java.util.zip.Inflater
            java.nio.charset.Charset))
 
@@ -106,7 +108,7 @@
     (try
       (f stop-chan)
       (catch Exception e
-        (log/error e "Enhandled exception in thread worker")))))
+        (log/error e "Unhandled exception in thread worker")))))
 
 (defn create-thread-looper [f]
   (let [stop-chan (chan)
@@ -119,36 +121,42 @@
 (defonce bytes-chan (chan (sliding-buffer 500)))
 (defonce region-items-chan (chan 50))
 
-(defn listen* []
+(defn listen* [out-chan]
   (let [context (zmq/context 1)]
-    (fn [stop-chan]
+    (fn [continue?]
       (let [server (next-server!)]
         (log/infof "Connecting to EMDR server %s..." server)
         (with-open [subscriber (doto (zmq/socket context :sub)
                                  (zmq/connect server)
-                                 (zmq/set-receive-timeout 300000)
+                                 (zmq/set-receive-timeout 60000)
                                  (zmq/subscribe ""))]
           (loop []
               (log/debug "Receiving item...")
               (let [bytes (zmq/receive subscriber)]
-                (if (and bytes (open?!! stop-chan))
+                (if (and bytes (continue?))
                   (do
                     (log/debug "Item received")
-                    (>!! bytes-chan bytes)
+                    (>!! out-chan bytes)
                     ;; Only continue loop if we received a message; else retry connection
                     (recur))
                   (log/info "Socket timed out")))))))))
 
-(defn listen []
-  (create-thread-looper (listen*)))
+;; (defn listen []
+;;   (create-thread-looper (listen*)))
 
-(defn convert []
-  (create-thread-looper
-   (fn [_]
-     (let [bytes (<!! bytes-chan)
-           region-items (bytes->region-items bytes)]
-       (if region-items
-         (>!! region-items-chan region-items))))))
+;; (defn convert []
+;;   (create-thread-looper
+;;    (fn [_]
+;;      (let [bytes (<!! bytes-chan)
+;;            region-items (bytes->region-items bytes)]
+;;        (if region-items
+;;          (>!! region-items-chan region-items))))))
+
+(defn- convert-item [in-chan out-chan]
+  (let [bytes (<!! in-chan)
+        region-items (bytes->region-items bytes)]
+    (if region-items
+      (>!! out-chan region-items))))
 
 (defn consume []
   (create-thread-looper
@@ -160,3 +168,62 @@
          ;;(db/insert-items region-items)
          )))))
 
+(defn- consume-item [in-chan db]
+  (if-let [region-items (<!! in-chan)]
+    (db/insert-items db region-items)))
+
+;;; Components
+
+(defrecord ItemProducer [out-chan worker]
+  component/Lifecycle
+  (start [this]
+    (if worker
+      this
+      (let [worker (worker/thread-worker
+                    (listen* out-chan))]
+        (worker/start! worker)
+        (assoc this :worker worker))))
+  (stop [this]
+    (if worker
+      (do (worker/stop! worker)
+          (assoc this :worker nil))
+      this)))
+
+(defn new-item-producer [out-chan]
+  (->ItemProducer out-chan nil))
+
+(defrecord ItemConverter [in-chan out-chan worker]
+  component/Lifecycle
+  (start [this]
+    (if worker
+      this
+      (let [worker (worker/thread-worker
+                    (fn [_] (convert-item in-chan out-chan)))]
+        (worker/start! worker)
+        (assoc this :worker worker))))
+  (stop [this]
+    (if worker
+      (do (worker/stop! worker)
+          (assoc this :worker nil))
+      this)))
+
+(defn new-item-converter [in-chan out-chan]
+  (->ItemConverter in-chan out-chan nil))
+
+(defrecord ItemConsumer [in-chan db worker]
+  component/Lifecycle
+  (start [this]
+    (if worker
+      this
+      (let [work-fn (fn [_] (consume-item in-chan db))
+            worker (worker/thread-worker work-fn)]
+        (worker/start! worker)
+        (assoc this :worker worker))))
+  (stop [this]
+    (if worker
+      (do (worker/stop! worker)
+          (assoc this :worker nil))
+      this)))
+
+(defn new-item-consumer [in-chan]
+  (->ItemConsumer in-chan nil nil))
