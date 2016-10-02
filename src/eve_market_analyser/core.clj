@@ -22,12 +22,18 @@
                    (handler/new-web-server)
                    [:db]))))
 
-(def system (atom nil))
+(defonce system (atom (create-system)))
+
+(defn start-system []
+  (swap! system component/start))
+
+(defn stop-system []
+  (swap! system component/stop-system))
 
 (defn -main [& args]
-  (reset! system (component/start (create-system)))
+  (start-system)
   (.addShutdownHook (Runtime/getRuntime)
                     (Thread. (fn []
                                (log/info "Shutting down...")
-                               (component/stop-system @system)))))
+                               (stop-system)))))
 
