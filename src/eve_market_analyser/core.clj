@@ -5,9 +5,10 @@
             [eve-market-analyser.handler :as handler]
             [clojure.core.async :as async :refer [chan sliding-buffer]]
             [com.stuartsierra.component :as component]
-            [ring.adapter.jetty :refer [run-jetty]]))
+            [ring.adapter.jetty :refer [run-jetty]]
+            [clojure.tools.logging :as log]))
 
-(defn system []
+(defn create-system []
   (let [bytes-chan (chan (sliding-buffer 500))
         region-items-chan (chan 50)]
     (component/system-map
@@ -21,6 +22,12 @@
                    (handler/new-web-server)
                    [:db]))))
 
+(def system (atom nil))
+
 (defn -main [& args]
-  (component/start (system)))
+  (reset! system (component/start (create-system)))
+  (.addShutdownHook (Runtime/getRuntime)
+                    (Thread. (fn []
+                               (log/info "Shutting down...")
+                               (component/stop-system @system)))))
 
