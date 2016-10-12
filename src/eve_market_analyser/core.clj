@@ -12,6 +12,8 @@
   (let [bytes-chan (chan (sliding-buffer 500))
         region-items-chan (chan 50)]
     (component/system-map
+     :bytes-chan bytes-chan
+     :region-items-chan region-items-chan
      :item-producer (feed/new-item-producer bytes-chan)
      :item-converter (feed/new-item-converter bytes-chan region-items-chan)
      :db (db/new-database)
@@ -22,13 +24,18 @@
                    (handler/new-web-server)
                    [:db]))))
 
-(defonce system (atom (create-system)))
+(defonce system (atom nil))
 
 (defn start-system []
-  (swap! system component/start))
+  (swap! system (fn [s]
+                  (if s
+                    s
+                    (component/start-system (create-system))))))
 
 (defn stop-system []
-  (swap! system component/stop-system))
+  (swap! system (fn [s]
+                  (when s (component/stop-system s))
+                  nil)))
 
 (defn -main [& args]
   (start-system)
