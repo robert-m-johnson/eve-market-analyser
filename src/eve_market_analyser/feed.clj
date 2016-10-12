@@ -140,10 +140,12 @@
         (.isAlive t)))))
 
 (defn- convert-item [in-chan out-chan]
-  (let [bytes (<!! in-chan)
-        region-items (bytes->region-items bytes)]
-    (if region-items
-      (>!! out-chan region-items))))
+  (if-let [bytes (<!! in-chan)]
+    (let [region-items (bytes->region-items bytes)]
+      (if region-items
+        (>!! out-chan region-items)))
+    ;; in-chan has been closed, so close out-chan
+    (async/close! out-chan)))
 
 (defn- consume-item [in-chan db]
   (if-let [region-items (<!! in-chan)]
