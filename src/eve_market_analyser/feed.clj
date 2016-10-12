@@ -100,25 +100,44 @@
     (swap! servers rest)
     (first svs)))
 
-(defn- listen* [out-chan]
-  (let [context (zmq/context 1)]
-    (fn [continue?]
+(defn- listen* [out-chan zmq-context continue?]
+  (fn []
+    (while true
       (let [server (next-server!)]
         (log/infof "Connecting to EMDR server %s..." server)
-        (with-open [subscriber (doto (zmq/socket context :sub)
+        (with-open [subscriber (doto (zmq/socket zmq-context :sub)
                                  (zmq/connect server)
                                  (zmq/set-receive-timeout 60000)
                                  (zmq/subscribe ""))]
-          (loop []
-              (log/debug "Receiving item...")
-              (let [bytes (zmq/receive subscriber)]
-                (if (and bytes (continue?))
-                  (do
-                    (log/debug "Item received")
-                    (>!! out-chan bytes)
-                    ;; Only continue loop if we received a message; else retry connection
-                    (recur))
-                  (log/info "Socket timed out")))))))))
+          (try
+            (loop []
+              (when (continue?)
+                (log/debug "Receiving item...")
+                (let [bytes (zmq/receive subscriber)]
+                  (if bytes
+                    (do
+                      (log/debug "Item received")
+                      (>!! out-chan bytes)
+                      ;; Only continue loop if we received a message; else retry connection
+                      (recur))
+                    (log/info "Socket timed out")))))
+            (catch Exception ex
+              (log/error ex)))))
+      (async/close! out-chan))))
+
+(defn zmq-worker [out-chan]
+  (let [zmq-context (zmq/context 1)
+        t (Thread. (listen* out-chan zmq-context #(not (Thread/interrupted))))]
+    (reify worker/Worker
+      (start! [this]
+        (log/debug "Starting ZMQ listener")
+        (.start t))
+      (stop! [this]
+        (log/debug "Terminating ZMQ context")
+        (.interrupt t)
+        (.term zmq-context))
+      (running? [this]
+        (.isAlive t)))))
 
 (defn- convert-item [in-chan out-chan]
   (let [bytes (<!! in-chan)
@@ -137,8 +156,7 @@
   (start [this]
     (if worker
       this
-      (let [worker (worker/thread-worker
-                    (listen* out-chan))]
+      (let [worker (zmq-worker out-chan)]
         (worker/start! worker)
         (assoc this :worker worker))))
   (stop [this]
