@@ -102,7 +102,7 @@
 
 (defn- listen* [out-chan zmq-context continue?]
   (fn []
-    (while true
+    (while (continue?)
       (let [server (next-server!)]
         (log/infof "Connecting to EMDR server %s..." server)
         (with-open [subscriber (doto (zmq/socket zmq-context :sub)
@@ -122,8 +122,8 @@
                       (recur))
                     (log/info "Socket timed out")))))
             (catch Exception ex
-              (log/error ex)))))
-      (async/close! out-chan))))
+              (log/error ex))))))
+    (async/close! out-chan)))
 
 (defn zmq-worker [out-chan]
   (let [zmq-context (zmq/context 1)
