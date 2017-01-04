@@ -6,10 +6,12 @@
             [eve-market-analyser.world :as world]
             [eve-market-analyser.db :as db]
             [eve-market-analyser.util :refer :all]
+            [eve-market-analyser.worker :as worker]
             [zeromq.zmq :as zmq]
             [cheshire.core :as chesh]
             [clojure.tools.logging :as log]
-            [clj-time.format])
+            [clj-time.format]
+            [com.stuartsierra.component :as component])
   (:import java.util.zip.Inflater
            java.nio.charset.Charset))
 
@@ -98,62 +100,108 @@
     (swap! servers rest)
     (first svs)))
 
-(defn- open?!! [stop-chan]
-  (alt!! stop-chan false :default :keep-going))
-
-(defn wrap-log-err [f]
-  (fn [stop-chan]
-    (try
-      (f stop-chan)
-      (catch Exception e
-        (log/error e "Enhandled exception in thread worker")))))
-
-(defn create-thread-looper [f]
-  (let [stop-chan (chan)
-        worker-fn (wrap-log-err f)]
-    (thread
-      (while (open?!! stop-chan)
-        (worker-fn stop-chan)))
-    stop-chan))
-
-(defonce bytes-chan (chan (sliding-buffer 500)))
-(defonce region-items-chan (chan 50))
-
-(defn listen* []
-  (let [context (zmq/context 1)]
-    (fn [stop-chan]
+(defn- listen* [out-chan zmq-context continue?]
+  (fn []
+    (while (continue?)
       (let [server (next-server!)]
         (log/infof "Connecting to EMDR server %s..." server)
-        (with-open [subscriber (doto (zmq/socket context :sub)
+        (with-open [subscriber (doto (zmq/socket zmq-context :sub)
                                  (zmq/connect server)
-                                 (zmq/set-receive-timeout 300000)
+                                 (zmq/set-receive-timeout 60000)
                                  (zmq/subscribe ""))]
-          (loop []
-              (log/debug "Receiving item...")
-              (let [bytes (zmq/receive subscriber)]
-                (if (and bytes (open?!! stop-chan))
-                  (do
-                    (log/debug "Item received")
-                    (>!! bytes-chan bytes)
-                    ;; Only continue loop if we received a message; else retry connection
-                    (recur))
-                  (log/info "Socket timed out")))))))))
+          (try
+            (loop []
+              (when (continue?)
+                (log/debug "Receiving item...")
+                (let [bytes (zmq/receive subscriber)]
+                  (if bytes
+                    (do
+                      (log/debug "Item received")
+                      (>!! out-chan bytes)
+                      ;; Only continue loop if we received a message; else retry connection
+                      (recur))
+                    (log/info "Socket timed out")))))
+            (catch Exception ex
+              (log/error ex))))))
+    (async/close! out-chan)))
 
-(defn listen []
-  (create-thread-looper (listen*)))
+(defn zmq-worker [out-chan]
+  (let [zmq-context (zmq/context 1)
+        t (Thread. (listen* out-chan zmq-context #(not (Thread/interrupted))))]
+    (reify worker/Worker
+      (start! [this]
+        (log/debug "Starting ZMQ listener")
+        (.start t))
+      (stop! [this]
+        (log/debug "Terminating ZMQ context")
+        (.interrupt t)
+        (.term zmq-context))
+      (running? [this]
+        (.isAlive t)))))
 
-(defn convert []
-  (create-thread-looper
-   (fn [_]
-     (let [bytes (<!! bytes-chan)
-           region-items (bytes->region-items bytes)]
-       (if region-items
-         (>!! region-items-chan region-items))))))
+(defn- convert-item [in-chan out-chan]
+  (if-let [bytes (<!! in-chan)]
+    (let [region-items (bytes->region-items bytes)]
+      (if region-items
+        (>!! out-chan region-items)))
+    ;; in-chan has been closed, so close out-chan
+    (async/close! out-chan)))
 
-(defn consume []
-  (create-thread-looper
-   (fn [_]
-     (let [region-items (<!! region-items-chan)]
-       (if region-items
-         (db/insert-items region-items))))))
+(defn- consume-item [in-chan db]
+  (if-let [region-items (<!! in-chan)]
+    (db/insert-items db region-items)))
 
+;;; Components
+
+(defrecord ItemProducer [out-chan worker]
+  component/Lifecycle
+  (start [this]
+    (if worker
+      this
+      (let [worker (zmq-worker out-chan)]
+        (worker/start! worker)
+        (assoc this :worker worker))))
+  (stop [this]
+    (if worker
+      (do (worker/stop! worker)
+          (assoc this :worker nil))
+      this)))
+
+(defn new-item-producer [out-chan]
+  (->ItemProducer out-chan nil))
+
+(defrecord ItemConverter [in-chan out-chan worker]
+  component/Lifecycle
+  (start [this]
+    (if worker
+      this
+      (let [worker (worker/thread-worker
+                    (fn [_] (convert-item in-chan out-chan)))]
+        (worker/start! worker)
+        (assoc this :worker worker))))
+  (stop [this]
+    (if worker
+      (do (worker/stop! worker)
+          (assoc this :worker nil))
+      this)))
+
+(defn new-item-converter [in-chan out-chan]
+  (->ItemConverter in-chan out-chan nil))
+
+(defrecord ItemConsumer [in-chan db worker]
+  component/Lifecycle
+  (start [this]
+    (if worker
+      this
+      (let [work-fn (fn [_] (consume-item in-chan db))
+            worker (worker/thread-worker work-fn)]
+        (worker/start! worker)
+        (assoc this :worker worker))))
+  (stop [this]
+    (if worker
+      (do (worker/stop! worker)
+          (assoc this :worker nil))
+      this)))
+
+(defn new-item-consumer [in-chan]
+  (->ItemConsumer in-chan nil nil))

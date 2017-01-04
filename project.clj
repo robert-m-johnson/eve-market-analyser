@@ -9,6 +9,7 @@
                  [org.zeromq/cljzmq "0.1.4"]
                  [clj-time "0.11.0"]
                  [com.github.kevinsawicki/timeago "1.0.1"]
+                 [com.stuartsierra/component "0.3.1"]
                  ;; JSON parsing
                  [cheshire "5.5.0"]
                  ;; MongoDB
@@ -20,7 +21,8 @@
                  [enlive "1.1.6"]
                  ;; Logging
                  [org.clojure/tools.logging "0.3.1"]
-                 [log4j/log4j "1.2.17"]]
+                 [log4j/log4j "1.2.17"]
+                 ]
   :jvm-opts ["-Djava.library.path=/usr/lib:/usr/local/lib"]
   :main ^:skip-aot eve-market-analyser.core
   ;; :global-vars {*warn-on-reflection* true}
