@@ -12,15 +12,19 @@
             [clojure.tools.logging :as log]
             [clj-time.format]
             [com.stuartsierra.component :as component])
-  (:import java.util.zip.Inflater
-           java.nio.charset.Charset))
+  (:import java.io.ByteArrayOutputStream
+           java.nio.charset.Charset
+           java.util.zip.Inflater))
 
 (defn- decompress [byte-arr]
   (let [inflater (Inflater.)
-        out-byte-arr (byte-array (-> (count byte-arr) (* 16)))]
+        buffer (byte-array 1024)
+        out-stream (ByteArrayOutputStream. (count byte-arr))]
     (.setInput inflater byte-arr)
-    (let [length (.inflate inflater out-byte-arr)]
-      (byte-array length out-byte-arr))))
+    (while (not (.finished inflater))
+      (let [length (.inflate inflater buffer)]
+        (.write out-stream buffer 0 length)))
+    (.toByteArray out-stream)))
 
 (defn- to-string [^bytes x]
   (String. x (Charset/forName "UTF-8")))
