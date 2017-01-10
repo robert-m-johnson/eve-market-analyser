@@ -7,8 +7,6 @@
             [compojure.route :as route]
             [com.stuartsierra.component :as component]
             [ring.adapter.jetty :refer [run-jetty]]
-            [selmer.parser :as parser]
-
             [clojure.tools.logging :as log]))
 
 (defn fetch-hub-prices-model [db item-name]
