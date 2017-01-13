@@ -6,7 +6,12 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/core.async "0.2.395"]
                  [org.clojure/algo.generic "0.1.2"]
-                 [org.zeromq/cljzmq "0.1.4"]
+
+                 [org.zeromq/cljzmq "0.1.4"
+                  ;; Disable native jzmq since it seems to be broken on ARM
+                  :exclusions [org.zeromq/jzmq]]
+                 [org.zeromq/jeromq "0.3.3"]
+
                  [clj-time "0.13.0"]
                  [com.github.kevinsawicki/timeago "1.0.1"]
                  [com.stuartsierra/component "0.3.2"]

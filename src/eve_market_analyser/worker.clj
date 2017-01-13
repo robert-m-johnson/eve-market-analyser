@@ -5,8 +5,7 @@
 
 (defprotocol Worker
   (start! [this])
-  (stop! [this])
-  (running? [this]))
+  (stop! [this]))
 
 (defn- open?!! [stop-chan]
   (alt!! stop-chan false :default true))
@@ -34,7 +33,15 @@
       (stop! [_]
         (when @stop-chan
           (async/close! @stop-chan)
-          (reset! stop-chan nil)))
-      (running? [_]
-        (run?)))))
+          (reset! stop-chan nil))))))
 
+(defn parallel-workers [work-fn n-threads]
+  (let [workers (into [] (repeatedly n-threads #(thread-worker work-fn)))]
+    (reify Worker
+      (start! [this]
+        (doseq [worker workers]
+          (start! worker))
+        this)
+      (stop! [this]
+        (doseq [worker workers]
+          (stop! worker))))))
