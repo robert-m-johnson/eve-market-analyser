@@ -43,7 +43,7 @@
       ;; corresponding value in the vector v
       (fmap #(nth v %) key-index-map))))
 
-(defn feed->region-item [feed-item]
+(defn feed->region-items [feed-item]
   (let [order-vec->order
         (vector-extractor* (:columns feed-item) {:price "price" :quantity "volRemaining" :isBid "bid"})
         rowsets (->> (:rowsets feed-item)
@@ -70,19 +70,20 @@
               :buyOrders buyOrders}))
          rowsets)))
 
-(defn bytes->region-items [bytes]
-  (log/debug "Converting bytes to region items...")
+(defn bytes->region-items
+  "Converts an EMDR feed byte array and converts it into a lazy sequence
+  of region items"
+  [bytes]
   (let [region-items
         (try
           (let [feed-item (some-> bytes decompress to-string (chesh/parse-string true))]
             (let [{resultType :resultType} feed-item]
               (if (= "orders" resultType)
-                (let [region-items (feed->region-item feed-item)]
+                (let [region-items (feed->region-items feed-item)]
                   region-items)
                 (log/debugf "Ignoring feed item of type '%s'" resultType))))
           (catch Exception ex
             (log/error ex)))]
-    (log/debug "Converted bytes to region items")
     region-items))
 
 ;; Full list of servers:
@@ -145,8 +146,14 @@
 
 (defn- convert-item [in-chan out-chan]
   (if-let [bytes (<!! in-chan)]
-    (let [region-items (bytes->region-items bytes)]
-      (if region-items
+    (do
+      (log/debug "Converting bytes to region items...")
+      (when-let [region-items (bytes->region-items bytes)]
+        ;; Realise the lazy-seq into a vector so that we force evaluation
+        ;; before putting the items onto the channel; we want all the CPU
+        ;; workload between these channels, the out-chan is for IO
+        (dorun region-items)
+        (log/debug "Converted bytes to region items")
         (>!! out-chan region-items)))
     ;; in-chan has been closed, so close out-chan
     (async/close! out-chan)))

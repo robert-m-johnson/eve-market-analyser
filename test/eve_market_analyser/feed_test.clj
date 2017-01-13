@@ -30,7 +30,7 @@
               :buyingPrice 6000
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
               :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
-           (feed->region-item feed-item-with-one-region)))))
+           (feed->region-items feed-item-with-one-region)))))
 
 (def feed-item-with-2-regions
   {:resultType "orders", :version "0.1", :uploadKeys [{:name "emk", :key "abc"} {:name "ec", :key "def"}],
@@ -66,7 +66,7 @@
               :buyingPrice 11500
               :sellOrders [{:price 8999 :quantity 1}]
               :buyOrders [{:price 11500 :quantity 48}]}]
-           (feed->region-item feed-item-with-2-regions)))))
+           (feed->region-items feed-item-with-2-regions)))))
 
 (def feed-item-with-unknown-region
   {:resultType "orders", :version "0.1", :uploadKeys [{:name "emk", :key "abc"} {:name "ec", :key "def"}],
@@ -98,7 +98,7 @@
               :buyingPrice 6000
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
               :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
-           (feed->region-item feed-item-with-unknown-region)))))
+           (feed->region-items feed-item-with-unknown-region)))))
 
 (def feed-item-with-nullsec-region
   {:resultType "orders", :version "0.1", :uploadKeys [{:name "emk", :key "abc"} {:name "ec", :key "def"}],
@@ -130,7 +130,7 @@
               :buyingPrice 6000
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
               :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
-           (feed->region-item feed-item-with-nullsec-region)))))
+           (feed->region-items feed-item-with-nullsec-region)))))
 
 (def feed-item-with-unknown-type
   {:resultType "orders", :version "0.1", :uploadKeys [{:name "emk", :key "abc"} {:name "ec", :key "def"}],
@@ -162,7 +162,7 @@
               :buyingPrice 6000
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
               :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
-           (feed->region-item feed-item-with-unknown-type)))))
+           (feed->region-items feed-item-with-unknown-type)))))
 (def feed-item-with-no-buy-orders
   {:resultType "orders", :version "0.1", :uploadKeys [{:name "emk", :key "abc"} {:name "ec", :key "def"}],
    :generator {:name "Yapeal", :version "11.335.1737"}, :currentTime "2011-10-22T15:46:00+00:00",
@@ -186,7 +186,7 @@
               :buyingPrice nil
               :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
               :buyOrders []}]
-           (feed->region-item feed-item-with-no-buy-orders)))))
+           (feed->region-items feed-item-with-no-buy-orders)))))
 
 (def feed-item-with-no-sell-orders
   {:resultType "orders", :version "0.1", :uploadKeys [{:name "emk", :key "abc"} {:name "ec", :key "def"}],
@@ -210,4 +210,4 @@
               :buyingPrice 6000
               :sellOrders []
               :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
-           (feed->region-item feed-item-with-no-sell-orders)))))
+           (feed->region-items feed-item-with-no-sell-orders)))))
