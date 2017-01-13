@@ -9,8 +9,8 @@
             [clojure.tools.logging :as log]))
 
 (defn create-system []
-  (let [bytes-chan (chan (sliding-buffer 500))
-        region-items-chan (chan 50)]
+  (let [bytes-chan (chan (sliding-buffer 250))
+        region-items-chan (chan 25)]
     (component/system-map
      :bytes-chan bytes-chan
      :region-items-chan region-items-chan
