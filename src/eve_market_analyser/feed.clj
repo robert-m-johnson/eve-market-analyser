@@ -43,6 +43,9 @@
       ;; corresponding value in the vector v
       (fmap #(nth v %) key-index-map))))
 
+(def ^:private date-formatter
+  (clj-time.format/formatter :date-time-no-ms))
+
 (defn feed->region-items [feed-item]
   (let [order-vec->order
         (vector-extractor* (:columns feed-item) {:price "price" :quantity "volRemaining" :isBid "bid"})
@@ -59,7 +62,7 @@
                  sellOrders (into [] (comp (filter #(not (:isBid %))) (map #(dissoc % :isBid))) orders)
                  buyingPrice (->> (map :price buyOrders) (apply-or-default max nil))
                  sellingPrice (->> (map :price sellOrders) (apply-or-default min nil))]
-             {:generatedTime (clj-time.format/parse (:generatedAt rowset))
+             {:generatedTime (clj-time.format/parse date-formatter (:generatedAt rowset))
               :typeId (:typeID rowset)
               :itemName (world/types (:typeID rowset))
               :regionId (:regionID rowset)
