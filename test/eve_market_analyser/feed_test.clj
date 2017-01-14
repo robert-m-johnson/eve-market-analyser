@@ -28,8 +28,8 @@
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice 6000
-              :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
+              :sellOrders [{:price 11500 :quantity 48} {:price 8999 :quantity 1} {:price 11499.99 :quantity 10}]
+              :buyOrders [{:price 5000 :quantity 48} {:price 6000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-items feed-item-with-one-region)))))
 
 (def feed-item-with-2-regions
@@ -96,8 +96,8 @@
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice 6000
-              :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
+              :sellOrders [{:price 11500 :quantity 48} {:price 8999 :quantity 1} {:price 11499.99 :quantity 10}]
+              :buyOrders [{:price 5000 :quantity 48} {:price 6000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-items feed-item-with-unknown-region)))))
 
 (def feed-item-with-nullsec-region
@@ -128,8 +128,8 @@
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice 6000
-              :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
+              :sellOrders [{:price 11500 :quantity 48} {:price 8999 :quantity 1} {:price 11499.99 :quantity 10}]
+              :buyOrders [{:price 5000 :quantity 48} {:price 6000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-items feed-item-with-nullsec-region)))))
 
 (def feed-item-with-unknown-type
@@ -160,8 +160,8 @@
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice 6000
-              :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
+              :sellOrders [{:price 11500 :quantity 48} {:price 8999 :quantity 1} {:price 11499.99 :quantity 10}]
+              :buyOrders [{:price 5000 :quantity 48} {:price 6000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-items feed-item-with-unknown-type)))))
 (def feed-item-with-no-buy-orders
   {:resultType "orders", :version "0.1", :uploadKeys [{:name "emk", :key "abc"} {:name "ec", :key "def"}],
@@ -184,7 +184,7 @@
               :regionName "Kor-Azor"
               :sellingPrice 8999
               :buyingPrice nil
-              :sellOrders [{:price 8999 :quantity 1} {:price 11499.99 :quantity 10} {:price 11500 :quantity 48}]
+              :sellOrders [{:price 11500 :quantity 48} {:price 8999 :quantity 1} {:price 11499.99 :quantity 10}]
               :buyOrders []}]
            (feed->region-items feed-item-with-no-buy-orders)))))
 
@@ -209,5 +209,5 @@
               :sellingPrice nil
               :buyingPrice 6000
               :sellOrders []
-              :buyOrders [{:price 6000 :quantity 48} {:price 5000 :quantity 48} {:price 4000 :quantity 48}]}]
+              :buyOrders [{:price 5000 :quantity 48} {:price 6000 :quantity 48} {:price 4000 :quantity 48}]}]
            (feed->region-items feed-item-with-no-sell-orders)))))
