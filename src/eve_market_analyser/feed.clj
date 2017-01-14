@@ -55,8 +55,8 @@
                      (filter #(world/empire-region? (:regionID %))))]
     (map (fn [rowset]
            (let [orders (->> (:rows rowset) (map order-vec->order))
-                 buyOrders (->>  (filter :isBid orders) (map #(dissoc % :isBid)) (sort-by :price >))
-                 sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)) (sort-by :price))
+                 buyOrders (->> (filter :isBid orders) (map #(dissoc % :isBid)) (sort-by :price >))
+                 sellOrders (->> (filter #(not (:isBid %)) orders) (map #(dissoc % :isBid)) (sort-by :price <))
                  buyingPrice (->> (map :price buyOrders) (apply-or-default max nil))
                  sellingPrice (->> (map :price sellOrders) (apply-or-default min nil))]
              {:generatedTime (clj-time.format/parse (:generatedAt rowset))
@@ -189,8 +189,9 @@
   (start [this]
     (if worker
       this
-      (let [worker (worker/thread-worker
-                    (fn [_] (convert-item in-chan out-chan)))]
+      (let [worker (worker/parallel-workers
+                    (fn [_] (convert-item in-chan out-chan))
+                    2)]
         (worker/start! worker)
         (assoc this :worker worker))))
   (stop [this]
