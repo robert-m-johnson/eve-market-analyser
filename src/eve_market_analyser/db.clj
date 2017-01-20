@@ -9,7 +9,11 @@
             ;; Enable joda integration
             [monger.joda-time])
   (:import [com.mongodb
-            BasicDBObject MongoOptions ServerAddress WriteConcern]))
+            BasicDBObject MongoOptions ServerAddress WriteConcern]
+           [com.mongodb.client.model
+            ReplaceOneModel UpdateOneModel UpdateOptions]
+           org.bson.Document
+           ))
 
 ;; Use fastest write concern so that pi can keep up
 ;; TODO: Use bulk writes so that a safer setting can be used
@@ -43,17 +47,32 @@
     (.put "sellOrders" (map orderItem->doc (:sellOrders marketItem)))
     (.put "buyOrders" (map orderItem->doc (:buyOrders marketItem)))))
 
+(defn- item->bulk-write-model [item]
+  (let [update-query (Document. {"typeId" (:typeId item)
+                                 "regionId" (:regionId item)
+                                 "generatedTime" (Document. {"$lt" (clj-time.coerce/to-date
+                                                                    (:generatedTime item))})})
+        update-doc (marketItem->doc item)
+        update-options (doto (UpdateOptions.) (.upsert true))]
+    (ReplaceOneModel. update-query update-doc update-options)))
+
+(defn- bulk-write [conn write-models]
+  (let [db (.getDatabase conn "eve")
+        collection (.getCollection db market-item-coll)]
+    (.bulkWrite collection write-models)))
+
+(defn- bulk-insert-items [conn items]
+  (log/trace "Bulk inserting items into DB...")
+  (let [write-models (java.util.ArrayList. (map item->bulk-write-model items))]
+    (when-not (.isEmpty write-models)
+      (bulk-write conn write-models)))
+  (log/trace "Bulk inserted items into DB"))
+
 (defn- insert-items* [conn items]
   (log/debug "Inserting items into DB...")
-  (doseq [item items]
-    (let [doc (marketItem->doc item)
-          update-query {"typeId" (:typeId item)
-                       "regionId" (:regionId item)
-                       "generatedTime" {"$lt" (:generatedTime item)}}]
-      (try
-        (mc/update (get-db conn) market-item-coll update-query doc {:upsert true})
-        (catch com.mongodb.DuplicateKeyException e
-          (log/debug "Item older than current; ignoring")))))
+  (let [batches (partition-all 1000 items)]
+    (doseq [batch batches]
+      (bulk-insert-items conn batch)))
   (log/debug "Inserted items into DB"))
 
 (def ^:private hub-ordering

@@ -18,7 +18,7 @@
                  ;; JSON parsing
                  [cheshire "5.6.3"]
                  ;; MongoDB
-                 [com.novemberain/monger "3.0.1"]
+                 [com.novemberain/monger "3.1.0"]
                  ;; Web
                  [ring/ring-core "1.5.0"]
                  [ring/ring-jetty-adapter "1.5.0"]
