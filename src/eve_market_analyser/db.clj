@@ -63,8 +63,10 @@
 
 (defn- bulk-insert-items [conn items]
   (log/trace "Bulk inserting items into DB...")
-  (let [write-models (java.util.ArrayList. (map item->bulk-write-model items))]
-    (when-not (.isEmpty write-models)
+  (let [write-models (map item->bulk-write-model items)]
+    ;; Only attempt to write if the seq is non-empty; annoyingly, the Mongo driver
+    ;; throws if the writes collection is empty.
+    (when (seq write-models)
       (bulk-write conn write-models)))
   (log/trace "Bulk inserted items into DB"))
 

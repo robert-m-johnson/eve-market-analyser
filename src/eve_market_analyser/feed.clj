@@ -155,17 +155,18 @@
     (do
       (log/debug "Converting bytes to region items...")
       (when-let [region-items (bytes->region-items bytes)]
-        ;; Count the number of items; we don't want the channel being taking up
-        ;; with empty seqs. Also has the effect of forcing evaluation
-        ;; before putting the items onto the channel; we want all the CPU
-        ;; workload between these channels, the out-chan is for IO
-        (let [num-items (count region-items)]
-          (if (< 0 num-items)
-            (do
-              (log/debug "Converted bytes to region items")
-              (>!! out-chan region-items))
-            (log/debug "Converted bytes to region items, but resuling collection was empty")))))
-    ;; in-chan has been closed, so close out-chan
+        ;; Only put a seq on the queue if it is non-empty;
+        ;; we don't want the channel being blocked up with empty seqs.
+        (if (seq region-items)
+          (do
+            ;; Force evaluation before putting items onto the channel;
+            ;; we want all the CPU workload between these channels,
+            ;; the out-chan is for IO
+            (dorun region-items)
+            (log/debug "Converted bytes to region items")
+            (>!! out-chan region-items))
+          (log/debug "Converted bytes to region items, but resulting collection was empty"))))
+    ;; In-chan has been closed, so close out-chan
     (async/close! out-chan)))
 
 (defn- consume-item [in-chan db]
