@@ -9,7 +9,7 @@
             ;; Enable joda integration
             [monger.joda-time])
   (:import [com.mongodb
-            BasicDBObject MongoOptions ServerAddress WriteConcern]
+            BasicDBObject MongoClient MongoOptions ServerAddress WriteConcern]
            [com.mongodb.client.model
             ReplaceOneModel UpdateOneModel UpdateOptions]
            org.bson.Document
@@ -56,7 +56,7 @@
         update-options (doto (UpdateOptions.) (.upsert true))]
     (ReplaceOneModel. update-query update-doc update-options)))
 
-(defn- bulk-write [conn write-models]
+(defn- bulk-write [^MongoClient conn write-models]
   (let [db (.getDatabase conn "eve")
         collection (.getCollection db market-item-coll)]
     (.bulkWrite collection write-models)))
@@ -79,10 +79,7 @@
 
 (def ^:private hub-ordering
   (let [names world/trade-hub-region-names]
-    (->>
-     (map #(vector % (.indexOf names %)) names)
-     flatten
-     (apply hash-map))))
+    (apply hash-map (interleave names (range (count names))))))
 
 (defn- find-hub-prices-for-item-name*
   ([conn item-name]
@@ -109,7 +106,7 @@
       component
       (let [conn (create-conn)]
         (assoc component :connection conn))))
-  (stop [{connection :connection :as component}]
+  (stop [{^MongoClient connection :connection :as component}]
     (log/debug "Stopping database")
     (let [component (if connection
                       (do (.close connection)

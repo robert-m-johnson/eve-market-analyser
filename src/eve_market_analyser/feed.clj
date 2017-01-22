@@ -14,7 +14,8 @@
             [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayOutputStream
            java.nio.charset.Charset
-           java.util.zip.Inflater))
+           java.util.zip.Inflater
+           [org.zeromq ZMQ$Socket]))
 
 (defn- decompress [byte-arr]
   (let [inflater (Inflater.)
@@ -33,7 +34,7 @@
   "Given a vector of column names, and a map of keys and corresponding column
   names, returns a function that, given a vector will return a map of the keys
   and the corresponding values taken from the vector"
-  [col-names name-map]
+  [^java.util.List col-names name-map]
   (let [key-index-map
         ;; Find the index of each col name in the vector;
         ;; gives e.g. {:price 0, :quantity 1, :isBid 6}
@@ -114,7 +115,7 @@
       (let [server (next-server!)]
         (log/infof "Connecting to EMDR server %s..." server)
         (try
-          (with-open [subscriber (doto (zmq/socket zmq-context :sub)
+          (with-open [^ZMQ$Socket subscriber (doto (zmq/socket zmq-context :sub)
                                    (zmq/connect server)
                                    (zmq/set-receive-timeout 60000)
                                    (zmq/subscribe ""))]
@@ -140,7 +141,8 @@
   (let [zmq-context (zmq/context 1)
         continue-result (atom true)
         continue? (fn [] @continue-result)
-        t (Thread. (listen* out-chan zmq-context continue?))]
+        t (Thread. ^Runnable (listen* out-chan zmq-context continue?)
+                   "zmq-listener")]
     (reify worker/Worker
       (start! [this]
         (log/debug "Starting ZMQ listener")
