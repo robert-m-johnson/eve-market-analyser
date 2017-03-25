@@ -116,9 +116,9 @@
         (log/infof "Connecting to EMDR server %s..." server)
         (try
           (with-open [^ZMQ$Socket subscriber (doto (zmq/socket zmq-context :sub)
-                                   (zmq/connect server)
-                                   (zmq/set-receive-timeout 60000)
-                                   (zmq/subscribe ""))]
+                                              (zmq/connect server)
+                                              (zmq/set-receive-timeout 60000)
+                                              (zmq/subscribe ""))]
             (try
               (loop []
                 (when (continue?)
