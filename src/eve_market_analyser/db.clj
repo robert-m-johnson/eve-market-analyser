@@ -4,16 +4,16 @@
             [monger.operators :refer :all]
             [clojure.tools.logging :as log]
             [eve-market-analyser.world :as world]
-            [clj-time.coerce]
+            [clj-time.coerce :as tc]
             [com.stuartsierra.component :as component]
             ;; Enable joda integration
             [monger.joda-time])
   (:import [com.mongodb
-            BasicDBObject MongoClient MongoOptions ServerAddress WriteConcern]
+            BasicDBObject ErrorCategory MongoBulkWriteException MongoClient
+            MongoOptions ServerAddress WriteConcern]
            [com.mongodb.client.model
             ReplaceOneModel UpdateOneModel UpdateOptions]
-           org.bson.Document
-           ))
+           org.bson.Document))
 
 ;; Use fastest write concern so that pi can keep up
 ;; TODO: Use bulk writes so that a safer setting can be used
@@ -59,7 +59,18 @@
 (defn- bulk-write [^MongoClient conn write-models]
   (let [db (.getDatabase conn "eve")
         collection (.getCollection db market-item-coll)]
-    (.bulkWrite collection write-models)))
+    (try
+      (.bulkWrite collection write-models)
+      (catch MongoBulkWriteException ex
+        ;; Ignore duplicate key exceptions; this simply means that
+        ;; we tried to insert an old record.
+        (let [errors (.getWriteErrors ex)
+              non-dup-errors (remove #(= ErrorCategory/DUPLICATE_KEY
+                                         (.getCategory %))
+                                     errors)]
+          (when (seq non-dup-errors)
+            (throw (ex-info "An error occurred writing the items to the DB"
+                            {:errors non-dup-errors}))))))))
 
 (defn- bulk-insert-items [conn items]
   (log/trace "Bulk inserting items into DB...")
